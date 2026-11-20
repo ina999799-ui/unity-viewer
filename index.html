@@ -9,38 +9,78 @@
 <style>
 :root{
   --bg:#191b1f; --panel:#22252b; --panel2:#2a2e35; --line:#353a43;
-  --ink:#e8eaee; --dim:#9aa1ad; --accent:#4c9bff; --accent2:#ffb84c; --bad:#ff6b6b;
+  --ink:#e8eaee; --dim:#9aa1ad; --accent:#4c9bff; --accent2:#ffb84c; --bad:#ff6b6b; --good:#5ad18a;
+  color-scheme:dark;
 }
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans Arabic",system-ui,sans-serif;display:flex;flex-direction:column;overflow-x:clip}
-button,input{font:inherit;color:inherit}
-header{display:flex;gap:10px;align-items:center;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
-header h1{font-size:17px;margin:0 0 0 8px;white-space:nowrap}
-form{display:flex;gap:8px;flex:1 1 420px}
+button,input,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+header{display:flex;gap:8px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:17px;margin:0;margin-inline-end:6px;white-space:nowrap}
+form{display:flex;gap:8px;flex:1 1 380px}
 #url{flex:1;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:16px;direction:ltr;text-align:left}
-#url:focus{outline:2px solid var(--accent);outline-offset:1px}
-.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;white-space:nowrap}
+#url:focus,#q:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{border-color:#4a505b}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:700}
-.btn:focus-visible{outline:2px solid var(--accent2)}
-main{flex:1;display:grid;grid-template-columns:400px minmax(0,1fr);min-height:0}
+.btn.icon{padding:0;width:44px;font-size:19px}
+.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent2);outline-offset:1px}
+.btn.on{border-color:var(--accent);color:var(--accent)}
+#star.on{color:var(--accent2);border-color:var(--accent2)}
+.hgroup{display:flex;gap:8px;align-items:center}
+/* dropdowns */
+.dd{position:relative}
+.dd>summary{list-style:none}
+.dd>summary::-webkit-details-marker{display:none}
+.menu{position:absolute;top:calc(100% + 6px);inset-inline-end:0;z-index:20;min-width:240px;max-width:min(360px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 12px 32px #000a}
+.menu .mi{display:flex;align-items:center;gap:6px;width:100%;min-height:42px;padding:0 10px;border:0;border-radius:8px;background:none;cursor:pointer;text-align:start}
+.menu .mi:hover{background:var(--panel2)}
+.menu .mi bdi{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:start}
+.menu .x{border:0;background:none;color:var(--dim);cursor:pointer;width:36px;height:36px;border-radius:8px;font-size:16px}
+.menu .x:hover{color:var(--bad);background:var(--panel2)}
+.menu .empty{padding:12px;font-size:13px}
+main{flex:1;display:grid;grid-template-columns:420px minmax(0,1fr);min-height:0}
 main>aside{order:-1}
 /* viewer */
 #viewer{position:relative;background:radial-gradient(ellipse at 50% 35%,#2d323b,#15171a 75%);min-height:300px;overflow:hidden}
 #viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#imgview{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:repeating-conic-gradient(#2a2e35 0 25%,#22252b 0 50%) 0 0/24px 24px}
-#imgview img{max-width:100%;max-height:100%;image-rendering:auto;box-shadow:0 8px 30px #0008}
+#imgview{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:64px 20px 20px;background:repeating-conic-gradient(#2a2e35 0 25%,#22252b 0 50%) 0 0/24px 24px}
+#imgview img{max-width:100%;max-height:100%;box-shadow:0 8px 30px #0008}
+#audview{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:20px}
+.audcard{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+.audcard .ico{font-size:40px;line-height:1;margin-bottom:8px;color:#ff9dbf}
+.audcard b{display:block;direction:ltr;overflow-wrap:anywhere;margin-bottom:14px}
+.audcard audio{width:100%}
 #msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--dim);pointer-events:none}
-#msg b{color:var(--ink);font-size:18px;display:block;margin-bottom:6px}
+#msg b{color:var(--ink);font-size:18px;display:block;margin-bottom:6px;overflow-wrap:anywhere}
 #msg a{pointer-events:auto;color:var(--accent)}
-.tools{position:absolute;top:10px;inset-inline-start:10px;display:flex;gap:6px;flex-wrap:wrap}
-.tools .btn{min-height:38px;padding:0 12px;background:#22252bd9;backdrop-filter:blur(6px);font-size:14px}
-.tools .btn.on{border-color:var(--accent);color:var(--accent)}
-#info{position:absolute;bottom:10px;inset-inline-start:10px;inset-inline-end:10px;background:#22252bd9;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--dim);display:none}
+.tools{position:absolute;top:10px;inset-inline-start:10px;inset-inline-end:10px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none;z-index:3}
+.tools .btn{pointer-events:auto;min-height:38px;padding:0 11px;background:#22252bd9;backdrop-filter:blur(6px);font-size:14px}
+.tools .btn i{font-style:normal;font-size:15px}
+.tools .sep{flex:1}
+.tools.no3d .only3d{display:none}
+#dims{position:absolute;top:58px;inset-inline-start:10px;background:#22252be6;border:1px solid var(--accent2);color:var(--accent2);border-radius:8px;padding:4px 10px;font-size:13px;direction:ltr;z-index:2}
+#info{position:absolute;bottom:10px;inset-inline-start:10px;inset-inline-end:10px;background:#22252bd9;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--dim);z-index:2}
 #info b{color:var(--ink)}
-/* hierarchy (scenes / prefabs) */
+/* animations */
+#anim{position:absolute;bottom:58px;inset-inline-start:10px;width:min(320px,calc(100% - 20px));background:#22252bf0;border:1px solid var(--line);border-radius:10px;padding:8px;z-index:2;font-size:13px}
+#anim .ah{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#anim .ah b{flex:1}
+#anim .ah .btn{min-height:34px;padding:0 10px;font-size:13px}
+#clips{max-height:132px;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.clip{display:flex;gap:8px;align-items:center;width:100%;min-height:32px;padding:0 8px;border:0;border-radius:6px;background:none;cursor:pointer;text-align:start}
+.clip:hover{background:var(--panel2)}
+.clip.on{background:#4c9bff2e;color:var(--accent)}
+.clip bdi{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:start}
+.clip small{color:var(--dim);direction:ltr}
+.speed{display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--dim)}
+.speed input{flex:1;accent-color:var(--accent)}
+.speed output{min-width:38px;text-align:end;direction:ltr;color:var(--ink)}
+/* hierarchy */
 #hier{position:absolute;top:58px;inset-inline-end:10px;width:min(300px,calc(100% - 20px));max-height:calc(100% - 120px);display:flex;flex-direction:column;background:#22252bf0;border:1px solid var(--line);border-radius:10px;overflow:hidden;z-index:2}
-#hier[hidden]{display:none}
+#hier[hidden]{display:none!important}
 .hhead{padding:8px 12px;font-weight:700;font-size:13px;border-bottom:1px solid var(--line)}
 .hhead small{display:block;font-weight:400;color:var(--dim);font-size:11px}
 #htree{overflow:auto;padding:4px 0;font-size:13px;direction:ltr;text-align:left}
@@ -57,39 +97,77 @@ main>aside{order:-1}
 .hn.pf bdi{color:#7fb8ff}.hn.md bdi{color:#9fd4ff}.hn.miss bdi{color:var(--bad)}.hn.off{opacity:.5}
 .hn.sel{background:#4c9bff33;outline:1px solid var(--accent)}
 .hn:focus-visible{outline:2px solid var(--accent)}
+/* drop overlay */
+#drop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#0d1a2bcc;border:3px dashed var(--accent);font-size:22px;font-weight:700;pointer-events:none}
 /* list side */
 aside{display:flex;flex-direction:column;background:var(--panel);border-inline-end:1px solid var(--line);min-height:0}
-#repoTitle{padding:12px 14px 4px;font-weight:700;direction:ltr;text-align:right;overflow-wrap:anywhere}
+.ahead{display:flex;align-items:center;gap:8px;padding:10px 14px 4px}
+#repoTitle{flex:1;font-weight:700;direction:ltr;text-align:right;overflow-wrap:anywhere}
+html[dir=ltr] #repoTitle{text-align:left}
+.ahead .btn{min-height:36px;padding:0 10px;font-size:13px}
 #note{padding:0 14px;font-size:13px;color:var(--accent2)}
+.search{padding:8px 14px 0}
+#q{width:100%;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:15px}
 .filters{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
 .chip{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;font-size:14px;white-space:nowrap}
 .chip span{color:var(--dim);margin-inline-start:4px;font-size:12px}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:600}
 .chip.on span{color:#06121fb0}
-.opts{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13px;color:var(--dim);border-bottom:1px solid var(--line)}
-.opts input{width:18px;height:18px;accent-color:var(--accent)}
+.opts{display:flex;align-items:center;gap:16px;padding:6px 14px;font-size:13px;color:var(--dim);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.opts label{display:flex;align-items:center;gap:8px;min-height:32px;cursor:pointer}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex:none;margin:0;cursor:pointer}
 #list{flex:1;overflow-y:auto;min-height:0}
-.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px 14px;border:0;border-bottom:1px solid #2c3037;background:none;text-align:right;cursor:pointer}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:0;border-bottom:1px solid #2c3037;padding-inline-start:14px}
 .row:hover{background:var(--panel2)}
 .row.sel{background:#4c9bff22;box-shadow:inset -3px 0 var(--accent)}
-.row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+html[dir=ltr] .row.sel{box-shadow:inset 3px 0 var(--accent)}
+.rowmain{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px 14px 9px 14px;border:0;background:none;text-align:start;cursor:pointer;min-height:52px}
+.rowmain:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;direction:ltr;min-width:42px;text-align:center}
 .nm{direction:ltr;text-align:right;overflow:hidden}
+html[dir=ltr] .nm{text-align:left}
 .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nm small{display:block;color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm mark{background:#ffb84c40;color:inherit;border-radius:3px}
 .sz{color:var(--dim);font-size:12px;white-space:nowrap;direction:ltr}
-.more{margin:12px auto;display:block}
+.more{margin:12px auto;display:flex}
 .empty{padding:30px 16px;color:var(--dim);text-align:center}
+#selbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line);background:var(--panel2)}
+#selbar span{flex:1;font-size:14px}
+#selbar .btn{min-height:38px;padding:0 12px;font-size:14px}
 .c3d{background:#4c9bff26;color:#7fb8ff}.cimg{background:#5ad18a26;color:#7fe0a5}.ccode{background:#c58cff26;color:#d6adff}
 .cscene{background:#ffb84c26;color:#ffc874}.caudio{background:#ff7aa826;color:#ff9dbf}.cother{background:#ffffff14;color:#b8bec9}
+/* project info dialog */
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:0;width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px)}
+dialog::backdrop{background:#000a}
+.dh{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.dh b{flex:1;font-size:17px}
+.dbody{padding:14px 16px;overflow:auto}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 14px}
+.kv dt{color:var(--dim)}
+.kv dd{margin:0;direction:ltr;text-align:right;overflow-wrap:anywhere}
+html[dir=ltr] .kv dd{text-align:left}
+.proj{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.proj h3{margin:0 0 10px;font-size:15px;direction:ltr;text-align:start}
+.pkgs{display:flex;flex-wrap:wrap;gap:6px;direction:ltr}
+.pkg{font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+.pkg small{color:var(--dim)}
+.dnote{font-size:12px;color:var(--dim)}
 @media(max-width:820px){
-  main{grid-template-columns:1fr;grid-template-rows:48vh auto}
-  #hier{top:100px;max-height:calc(100% - 150px)}
+  main{grid-template-columns:1fr;grid-template-rows:52vh auto;flex:none}
+  #selbar{position:sticky;bottom:0;z-index:5}
+  #hier{top:58px;max-height:calc(100% - 120px)}
   main>aside{order:0;border-inline-end:0;border-top:1px solid var(--line)}
   #list{max-height:none;overflow:visible}
   body{overflow-y:auto}
+  .tools .btn span{display:none}
+  #clips{max-height:76px}
+  #anim{width:min(260px,calc(100% - 20px))}
+  .tools .btn{width:38px;padding:0}
+  #dims{top:58px}
+  header h1{font-size:15px}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 <script type="importmap">
 {"imports":{
@@ -101,40 +179,89 @@ aside{display:flex;flex-direction:column;background:var(--panel);border-inline-e
 </head>
 <body>
 <header>
-  <h1>عارض مشاريع Unity</h1>
+  <h1 data-t="title">عارض مشاريع Unity</h1>
   <form id="f">
     <input id="url" type="text" inputmode="url" autocomplete="off" spellcheck="false"
-      placeholder="https://github.com/owner/repo" aria-label="رابط المشروع من GitHub">
-    <button class="btn primary" type="submit">اعرض</button>
+      placeholder="https://github.com/owner/repo" data-t-aria="urlLabel" aria-label="">
+    <button class="btn icon" type="button" id="star" data-t-title="favAdd" data-t-aria="favAdd" hidden>☆</button>
+    <button class="btn primary" type="submit" data-t="show">اعرض</button>
   </form>
+  <div class="hgroup">
+    <details class="dd" id="localDD">
+      <summary class="btn"><span aria-hidden="true">📂</span><span data-t="local"></span></summary>
+      <div class="menu">
+        <button type="button" class="mi" id="pickFilesBtn" data-t="pickFiles"></button>
+        <button type="button" class="mi" id="pickDirBtn" data-t="pickDir"></button>
+        <div class="empty" data-t="localHint"></div>
+      </div>
+    </details>
+    <details class="dd" id="favDD">
+      <summary class="btn"><span aria-hidden="true">★</span><span data-t="favs"></span></summary>
+      <div class="menu" id="favList"></div>
+    </details>
+    <button class="btn" type="button" id="lang" lang="en">English</button>
+  </div>
+  <input type="file" id="pickFiles" multiple hidden>
+  <input type="file" id="pickDir" webkitdirectory multiple hidden>
 </header>
 
 <main>
-  <section id="viewer" aria-label="العارض">
+  <section id="viewer" data-t-aria="viewer" aria-label="">
     <div id="imgview"><img id="img" alt=""></div>
-    <div id="msg"><b>الصق رابط مشروع من GitHub</b>بعدين اختار أي ملف 3D من القائمة حتى ينعرض هنا</div>
+    <div id="audview"><div class="audcard"><div class="ico" aria-hidden="true">♪</div><b id="audName"></b><audio id="aud" controls preload="metadata"></audio></div></div>
+    <div id="msg"></div>
     <div class="tools" id="tools" hidden>
-      <button class="btn" id="tFit" type="button">رجّع الكاميرا</button>
-      <button class="btn" id="tWire" type="button">هيكل سلكي</button>
-      <button class="btn on" id="tGrid" type="button">الأرضية</button>
-      <button class="btn" id="tSpin" type="button">لف تلقائي</button>
-      <button class="btn" id="tHier" type="button" hidden>الهيكل</button>
+      <button class="btn only3d" id="tFit" type="button" data-t-title="fit"><i aria-hidden="true">⟲</i><span data-t="fit"></span></button>
+      <button class="btn only3d on" id="tLock" type="button" data-t-title="lockTip"><i aria-hidden="true">🔒</i><span data-t="lock"></span></button>
+      <button class="btn only3d" id="tWire" type="button" data-t-title="wire"><i aria-hidden="true">▦</i><span data-t="wire"></span></button>
+      <button class="btn only3d on" id="tGrid" type="button" data-t-title="grid"><i aria-hidden="true">⊞</i><span data-t="grid"></span></button>
+      <button class="btn only3d" id="tSpin" type="button" data-t-title="spin"><i aria-hidden="true">↻</i><span data-t="spin"></span></button>
+      <button class="btn only3d" id="tMeasure" type="button" data-t-title="measure"><i aria-hidden="true">📏</i><span data-t="measure"></span></button>
+      <button class="btn only3d" id="tShot" type="button" data-t-title="shot"><i aria-hidden="true">📷</i><span data-t="shot"></span></button>
+      <button class="btn only3d" id="tHier" type="button" data-t-title="hier" hidden><i aria-hidden="true">☰</i><span data-t="hier"></span></button>
+      <span class="sep"></span>
+      <button class="btn" id="tDl" type="button" data-t-title="download"><i aria-hidden="true">⬇</i><span data-t="download"></span></button>
     </div>
+    <div id="dims" hidden></div>
     <div id="hier" hidden>
-      <div class="hhead">Hierarchy <small>اضغط على أي عنصر حتى تروح له</small></div>
+      <div class="hhead">Hierarchy <small data-t="hierTip"></small></div>
       <div id="htree"></div>
     </div>
-    <div id="info"></div>
+    <div id="anim" hidden>
+      <div class="ah"><b data-t="anims"></b><button class="btn" id="aPlay" type="button"></button></div>
+      <div id="clips"></div>
+      <label class="speed"><span data-t="speed"></span><input type="range" id="aSpeed" min="0" max="3" step="0.1" value="1"><output id="aSpeedV">1.0×</output></label>
+    </div>
+    <div id="info" hidden></div>
   </section>
 
   <aside>
-    <div id="repoTitle"></div>
+    <div class="ahead">
+      <div id="repoTitle"></div>
+      <button class="btn" type="button" id="infoBtn" hidden><span aria-hidden="true">ℹ</span><span data-t="info"></span></button>
+    </div>
     <div id="note"></div>
+    <div class="search"><input id="q" type="search" autocomplete="off" spellcheck="false" data-t-ph="search" data-t-aria="search" aria-label="" disabled></div>
     <div class="filters" id="filters"></div>
-    <label class="opts"><input type="checkbox" id="hideMeta" checked> إخفاء ملفات ‎.meta</label>
-    <div id="list"><div class="empty">ماكو مشروع بعد</div></div>
+    <div class="opts">
+      <label><input type="checkbox" id="hideMeta" checked><span data-t="hideMeta"></span></label>
+      <label><input type="checkbox" id="selAll"><span data-t="selectAll"></span></label>
+    </div>
+    <div id="list"></div>
+    <div id="selbar" hidden>
+      <span id="selCount"></span>
+      <button class="btn primary" type="button" id="zipBtn"><span aria-hidden="true">⬇</span><span data-t="zip"></span></button>
+      <button class="btn" type="button" id="selClear" data-t="clear"></button>
+    </div>
   </aside>
 </main>
+
+<div id="drop" hidden data-t="dropHint"></div>
+
+<dialog id="infoDlg">
+  <div class="dh"><b data-t="info"></b><button class="btn icon" type="button" id="infoClose" data-t-aria="close" aria-label="">✕</button></div>
+  <div class="dbody" id="infoBody"></div>
+</dialog>
 
 <script type="module">
 import * as THREE from 'three';
@@ -152,121 +279,496 @@ import {load as yamlLoad} from 'js-yaml';
 
 {
 const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){
+    let v = null;
+    try{ v = localStorage.getItem(k); }catch(e){ return d; }
+    if(v === null) return d;
+    try{ return JSON.parse(v); }catch(e){ return v; }      // older versions stored plain strings
+  },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+};
 
-/* ---------- file types ---------- */
+/* =====================================================================
+   i18n
+   ===================================================================== */
+const STR = {
+ar:{
+  title:'عارض مشاريع Unity', show:'اعرض', urlLabel:'رابط المشروع من GitHub',
+  local:'من جهازي', pickFiles:'اختار ملفات…', pickDir:'اختار مجلد (مشروع كامل)…',
+  localHint:'أو اسحب الملفات وأفلتها على الصفحة. الملفات تبقى بجهازك وما تنرفع لأي مكان.',
+  dropHint:'أفلت الملفات أو المجلد هنا',
+  favs:'المفضلة', favAdd:'أضف المشروع للمفضلة', favRemove:'شيل المشروع من المفضلة',
+  favEmpty:'ماكو مشاريع مفضلة بعد. اعرض مشروع واضغط ☆ جنب الرابط حتى تحفظه.', remove:'حذف',
+  viewer:'العارض',
+  welcomeT:'الصق رابط مشروع من GitHub', welcomeX:'أو افتح ملفات من جهازك، بعدين اختار أي ملف من القائمة حتى ينعرض هنا',
+  fit:'رجّع الكاميرا', lock:'ثبّت الكاميرا', lockTip:'الكاميرا تبقى بمكانها لما تبدّل بين الملفات',
+  wire:'هيكل سلكي', grid:'الأرضية', spin:'لف تلقائي', measure:'القياس', shot:'صورة PNG', hier:'الهيكل', download:'تنزيل',
+  hierTip:'اضغط حتى تحدد، ودبل كلك حتى تروح له', noName:'(بلا اسم)',
+  anims:'الأنيميشن', play:'▶ شغّل', pause:'⏸ وقّف', speed:'السرعة',
+  dims:'العرض {0} · الارتفاع {1} · العمق {2}', mU:'م', cmU:'سم',
+  search:'دوّر بالملفات…', hideMeta:'إخفاء ملفات ‎.meta', selectAll:'حدد الظاهر',
+  noProject:'ماكو مشروع بعد', fetching:'جاري جلب الملفات…', noMatch:'ماكو ملفات تطابق',
+  more:'اعرض أكثر ({0} باقي)', selected:'{0} ملف محدد · {1}', zip:'ZIP', clear:'مسح التحديد',
+  zipping:'جاري تجهيز ZIP… {0} / {1}', zipBig:'الملفات المحددة حجمها {0}، يمكن ياخذ وقت. تكمل؟',
+  zipDone:'تم تنزيل {0} ملف', zipSome:'{0} ملف ما نزل', selectFile:'حدد',
+  info:'معلومات المشروع', close:'سكّر', loadingInfo:'جاري قراءة معلومات المشروع…',
+  unityVer:'نسخة Unity', productName:'اسم اللعبة', company:'الشركة', pipeline:'الرندر', packages:'الـPackages ({0})',
+  noPackages:'ما لكيت Packages/manifest.json', noUnity:'ما لكيت ProjectSettings/ProjectVersion.txt، يمكن هذا مو مشروع Unity.',
+  totalSize:'حجم المشروع', assetsSize:'حجم Assets', fileCount:'عدد الملفات', scenes:'المشاهد',
+  lfsNote:'{0} ملف محفوظ بـGit LFS وحجمه الحقيقي مو محسوب.', builtin:'Built-in',
+  all:'الكل', c3d:'3D', cimg:'صور', ccode:'سكربتات', cscene:'مشاهد وبريفاب', caudio:'صوت', cother:'باقي الملفات',
+  notFound:'المشروع مو موجود أو مقفول (private).', rateLimit:'وصلت حد GitHub للطلبات (60 بالساعة بدون تسجيل). انتظر شوية وجرب.',
+  ghErr:'صار خطأ من GitHub: {0}', badLink:'الرابط مو صحيح', badLinkHint:'اكتبه هيج: https://github.com/owner/repo',
+  truncated:'المشروع كبير هواية، GitHub رجّع جزء من الملفات بس.', noAssets:'ما لكيت مجلد Assets، يمكن هذا مو مشروع Unity.',
+  fetched:'تم جلب {0} ملف', has3d:'بيه {0} ملف 3D. اختار واحد من القائمة.', no3d:'ما بيه ملفات 3D.',
+  cantFetch:'ما كدرت أجيب المشروع', dlFail:'ما كدرت أنزل الملف ({0})', lfsFail:'الملف محفوظ بـGit LFS وما كدرت أجيبه',
+  loading:'جاري التحميل…', imgFail:'الصورة ما انفتحت', audFail:'الصوت ما اشتغل بالمتصفح', err:'صار خطأ',
+  needApp:'ملفات {0} تحتاج برنامجها الأصلي، ما تنعرض بالمتصفح.', notViewable:'هذا الملف ما ينعرض هنا. تكدر تنزله أو تفتحه بـGitHub.',
+  notViewableLocal:'هذا الملف ما ينعرض هنا.',
+  readingFile:'جاري قراءة الملف…', loadingModel:'جاري تحميل الموديل…', cantShowFile:'ما كدرت أعرض الملف', cantShowModel:'ما كدرت أعرض الموديل',
+  unsupported:'نوع غير مدعوم: {0}', binaryScene:'هذا الملف محفوظ بصيغة Binary. بـUnity لازم Asset Serialization = Force Text حتى ينقرا.',
+  indexing:'جاري فهرسة ملفات ‎.meta… (أول مرة بس)', building:'جاري بناء المشهد…', openGh:'افتحه بـGitHub',
+  localTitle:'{0} · من جهازك', localFiles:'ملفات من جهازك', localNote:'الملفات من جهازك وما تنرفع لأي مكان.',
+  meshes:'{0} ميش', verts:'{0} نقطة', tris:'{0} مثلث', animsN:'{0} أنيميشن', gos:'{0} GameObject', prefabsN:'{0} Prefab',
+  missingMesh:'{0} ميش ما انلكى', missingPrefab:'{0} Prefab ما انلكى', bytes:'بايت',
+},
+en:{
+  title:'Unity Project Viewer', show:'Show', urlLabel:'GitHub project link',
+  local:'From my device', pickFiles:'Pick files…', pickDir:'Pick a folder (whole project)…',
+  localHint:'Or drag and drop files onto the page. Files stay on your device and are not uploaded anywhere.',
+  dropHint:'Drop files or a folder here',
+  favs:'Favorites', favAdd:'Add project to favorites', favRemove:'Remove project from favorites',
+  favEmpty:'No favorites yet. Open a project and press ☆ next to the link to save it.', remove:'Remove',
+  viewer:'Viewer',
+  welcomeT:'Paste a GitHub project link', welcomeX:'or open files from your device, then pick any file in the list to view it here',
+  fit:'Reset camera', lock:'Lock camera', lockTip:'Camera stays put when you switch files',
+  wire:'Wireframe', grid:'Ground', spin:'Auto-rotate', measure:'Measure', shot:'PNG screenshot', hier:'Hierarchy', download:'Download',
+  hierTip:'Click to select, double-click to fly to it', noName:'(no name)',
+  anims:'Animations', play:'▶ Play', pause:'⏸ Pause', speed:'Speed',
+  dims:'W {0} · H {1} · D {2}', mU:'m', cmU:'cm',
+  search:'Search files…', hideMeta:'Hide .meta files', selectAll:'Select visible',
+  noProject:'No project yet', fetching:'Fetching files…', noMatch:'No matching files',
+  more:'Show more ({0} left)', selected:'{0} selected · {1}', zip:'ZIP', clear:'Clear selection',
+  zipping:'Preparing ZIP… {0} / {1}', zipBig:'The selected files total {0}; this may take a while. Continue?',
+  zipDone:'Downloaded {0} files', zipSome:'{0} files failed', selectFile:'Select',
+  info:'Project info', close:'Close', loadingInfo:'Reading project info…',
+  unityVer:'Unity version', productName:'Product name', company:'Company', pipeline:'Render pipeline', packages:'Packages ({0})',
+  noPackages:'No Packages/manifest.json found', noUnity:'No ProjectSettings/ProjectVersion.txt found; this may not be a Unity project.',
+  totalSize:'Project size', assetsSize:'Assets size', fileCount:'Files', scenes:'Scenes',
+  lfsNote:'{0} files are stored with Git LFS; their real size is not counted.', builtin:'Built-in',
+  all:'All', c3d:'3D', cimg:'Images', ccode:'Scripts', cscene:'Scenes & prefabs', caudio:'Audio', cother:'Other',
+  notFound:'Project not found, or it is private.', rateLimit:'GitHub request limit reached (60 per hour without sign-in). Wait a bit and try again.',
+  ghErr:'GitHub error: {0}', badLink:'Invalid link', badLinkHint:'Use: https://github.com/owner/repo',
+  truncated:'The project is very large; GitHub returned only part of the files.', noAssets:'No Assets folder found; this may not be a Unity project.',
+  fetched:'Fetched {0} files', has3d:'{0} 3D files. Pick one from the list.', no3d:'No 3D files.',
+  cantFetch:'Could not load the project', dlFail:'Could not download the file ({0})', lfsFail:'The file is stored with Git LFS and could not be fetched',
+  loading:'Loading…', imgFail:'The image could not be opened', audFail:'The browser could not play this audio', err:'Something went wrong',
+  needApp:'{0} files need their own program and cannot be shown in the browser.', notViewable:'This file can’t be shown here. You can download it or open it on GitHub.',
+  notViewableLocal:'This file can’t be shown here.',
+  readingFile:'Reading the file…', loadingModel:'Loading the model…', cantShowFile:'Could not show the file', cantShowModel:'Could not show the model',
+  unsupported:'Unsupported type: {0}', binaryScene:'This file is saved as Binary. In Unity set Asset Serialization = Force Text to read it.',
+  indexing:'Indexing .meta files… (first time only)', building:'Building the scene…', openGh:'Open on GitHub',
+  localTitle:'{0} · on your device', localFiles:'Files from your device', localNote:'Files are from your device and are not uploaded anywhere.',
+  meshes:'{0} meshes', verts:'{0} vertices', tris:'{0} triangles', animsN:'{0} animations', gos:'{0} GameObjects', prefabsN:'{0} prefabs',
+  missingMesh:'{0} meshes not found', missingPrefab:'{0} prefabs not found', bytes:'B',
+}};
+let lang = store.get('lang', 'ar') === 'en' ? 'en' : 'ar';
+const t = (k, ...a) => (STR[lang][k] ?? STR.ar[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
+const tx = v => typeof v === 'function' ? v() : Array.isArray(v) ? t(...v) : (v ?? '');
+class TErr extends Error{ constructor(k, ...a){ super(t(k, ...a)); this.k = [k, ...a]; } }
+const errText = e => e?.k ? e.k : (e?.message || String(e));
+const nf = n => Math.round(n).toLocaleString('en');
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.title = t('title');
+  document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.dataset.t));
+  document.querySelectorAll('[data-t-ph]').forEach(el => el.placeholder = t(el.dataset.tPh));
+  document.querySelectorAll('[data-t-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.tAria)));
+  document.querySelectorAll('[data-t-title]').forEach(el => el.title = t(el.dataset.tTitle));
+  $('lang').textContent = lang === 'ar' ? 'English' : 'عربي';
+  $('lang').lang = lang === 'ar' ? 'en' : 'ar';
+  renderMsg(); renderInfo(); renderTitle(); renderFav(); renderAnimUI(); renderSelbar();
+  if(files.length){ renderFilters(); renderList(); } else $('list').innerHTML = `<div class="empty">${esc(t('noProject'))}</div>`;
+  if(current && !$('tHier').hidden) showHierarchy(current, true);
+  if(measureOn) updateMeasure();
+}
+$('lang').onclick = () => { lang = lang === 'ar' ? 'en' : 'ar'; store.set('lang', lang); applyLang(); };
+
+/* =====================================================================
+   file types
+   ===================================================================== */
 const CATS = [
-  {id:'all',   name:'الكل'},
-  {id:'3d',    name:'3D',            cls:'c3d',    ext:['fbx','obj','gltf','glb','stl','ply','dae','3ds','blend','max','ma','mb']},
-  {id:'img',   name:'صور',           cls:'cimg',   ext:['png','jpg','jpeg','tga','psd','tif','tiff','exr','hdr','bmp','gif','webp']},
-  {id:'code',  name:'سكربتات',       cls:'ccode',  ext:['cs','shader','hlsl','cginc','compute','shadergraph','shadersubgraph','js','json','asmdef']},
-  {id:'scene', name:'مشاهد وبريفاب', cls:'cscene', ext:['unity','prefab']},
-  {id:'audio', name:'صوت',           cls:'caudio', ext:['wav','mp3','ogg','aif','aiff','flac']},
-  {id:'other', name:'باقي الملفات',  cls:'cother', ext:[]}
+  {id:'all'},
+  {id:'3d',    cls:'c3d',    ext:['fbx','obj','gltf','glb','stl','ply','dae','3ds','blend','max','ma','mb']},
+  {id:'img',   cls:'cimg',   ext:['png','jpg','jpeg','tga','psd','tif','tiff','exr','hdr','bmp','gif','webp']},
+  {id:'code',  cls:'ccode',  ext:['cs','shader','hlsl','cginc','compute','shadergraph','shadersubgraph','js','json','asmdef']},
+  {id:'scene', cls:'cscene', ext:['unity','prefab']},
+  {id:'audio', cls:'caudio', ext:['wav','mp3','ogg','aif','aiff','flac']},
+  {id:'other', cls:'cother', ext:[]}
 ];
+const catLabel = id => id === 'all' ? t('all') : t('c' + id);
 const VIEW3D = ['fbx','obj','gltf','glb','stl','ply','dae','3ds'];
 const VIEWIMG = ['png','jpg','jpeg','gif','bmp','webp'];
+const VIEWAUD = ['wav','mp3','ogg'];
+const AUDTYPE = {wav:'audio/wav', mp3:'audio/mpeg', ogg:'audio/ogg'};
 const extCat = {};
 CATS.forEach(c => (c.ext||[]).forEach(e => extCat[e] = c.id));
 const catOf = id => CATS.find(c => c.id === id);
 
-/* ---------- state ---------- */
-let repo = null, files = [], byName = new Map(), fileByPath = new Map(), filter = 'all', limit = 400, selPath = null;
+/* =====================================================================
+   state + source (GitHub repo or local files)
+   ===================================================================== */
+let repo = null;            // {kind:'gh', owner, name, branch, treeSha} | {kind:'local', label, map}
+let files = [], byName = new Map(), fileByPath = new Map();
+let filter = 'all', limit = 400, selPath = null, query = '';
+const checked = new Set();
 
-/* ---------- github ---------- */
+function makeFile(path, size){
+  const name = path.split('/').pop();
+  const dot = name.lastIndexOf('.');
+  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
+  return {path, name, dir:path.slice(0, -name.length - 1), ext, size:size || 0, lpath:path.toLowerCase(),
+          cat: ext === 'meta' ? 'meta' : (extCat[ext] || 'other')};
+}
+function setFiles(list){
+  files = list;
+  fileByPath = new Map(files.map(f => [f.path, f]));
+  byName = new Map();
+  files.forEach(f => { const k = f.name.toLowerCase(); if(!byName.has(k)) byName.set(k, f.path); });
+  guidIndex = null; guidIndexP = null; scriptsReady = false;
+  checked.clear(); selPath = null; limit = 400; query = ''; $('q').value = ''; $('q').disabled = false;
+  fittedOnce = false;              // the camera lock applies within one project; a new one gets framed once
+  revokeLocalUrls();
+}
+
 function parseRepo(s){
   s = s.trim().replace(/\.git$/,'').replace(/\/+$/,'');
   let m = s.match(/github\.com\/([^\/\s]+)\/([^\/\s#?]+)(?:\/tree\/([^\/?#]+))?/i);
   if(!m) m = s.match(/^([\w.-]+)\/([\w.-]+)$/);
-  return m ? {owner:m[1], name:m[2], branch:m[3]||null} : null;
+  return m ? {kind:'gh', owner:m[1], name:m[2], branch:m[3]||null} : null;
 }
 const enc = p => p.split('/').map(encodeURIComponent).join('/');
 const rawUrl   = p => `https://raw.githubusercontent.com/${repo.owner}/${repo.name}/${encodeURIComponent(repo.branch)}/${enc(p)}`;
 const mediaUrl = p => `https://media.githubusercontent.com/media/${repo.owner}/${repo.name}/${encodeURIComponent(repo.branch)}/${enc(p)}`;
-const ghUrl    = p => `https://github.com/${repo.owner}/${repo.name}/blob/${encodeURIComponent(repo.branch)}/${enc(p)}`;
+const ghUrl    = p => repo?.kind === 'gh' ? `https://github.com/${repo.owner}/${repo.name}/blob/${encodeURIComponent(repo.branch)}/${enc(p)}` : null;
+const repoKey  = () => repo?.kind === 'gh' ? `${repo.owner}/${repo.name}` : null;
 
+/* local blob URLs, created on demand */
+let localUrls = new Map();
+function revokeLocalUrls(){ localUrls.forEach(u => URL.revokeObjectURL(u)); localUrls = new Map(); }
+/* URL a loader can fetch for a file (handles Git LFS pointers on GitHub) */
+function fileUrl(f){
+  if(repo.kind === 'local'){
+    if(!localUrls.has(f.path)) localUrls.set(f.path, URL.createObjectURL(repo.map.get(f.path)));
+    return localUrls.get(f.path);
+  }
+  return f.size < 300 ? mediaUrl(f.path) : rawUrl(f.path);   // tiny = Git LFS pointer
+}
+async function getBuffer(path){
+  if(repo.kind === 'local'){
+    const file = repo.map.get(path); if(!file) throw new TErr('dlFail', 404);
+    return file.arrayBuffer();
+  }
+  let r = await fetch(rawUrl(path));
+  if(!r.ok) throw new TErr('dlFail', r.status);
+  let buf = await r.arrayBuffer();
+  if(buf.byteLength < 400){
+    const tt = new TextDecoder().decode(buf);
+    if(tt.startsWith('version https://git-lfs')){
+      r = await fetch(mediaUrl(path));
+      if(!r.ok) throw new TErr('lfsFail');
+      buf = await r.arrayBuffer();
+    }
+  }
+  return buf;
+}
+const td = new TextDecoder();
+const readText = async p => td.decode(await getBuffer(p));
+
+/* ---------- GitHub ---------- */
 async function api(path){
   const r = await fetch('https://api.github.com' + path, {headers:{Accept:'application/vnd.github+json'}});
-  if(r.status === 404) throw new Error('المشروع مو موجود أو مقفول (private).');
-  if(r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0')) throw new Error('وصلت حد GitHub للطلبات (60 بالساعة بدون تسجيل). انتظر شوية وجرب.');
-  if(!r.ok) throw new Error('صار خطأ من GitHub: ' + r.status);
+  if(r.status === 404) throw new TErr('notFound');
+  if(r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0')) throw new TErr('rateLimit');
+  if(!r.ok) throw new TErr('ghErr', r.status);
   return r.json();
 }
 
+let repoNote = [];   // keys shown under the title
 async function loadRepo(input){
   const p = parseRepo(input);
-  if(!p){ setMsg('الرابط مو صحيح','اكتبه هيج: https://github.com/owner/repo'); return; }
-  repo = p; files = []; byName.clear(); guidIndex = null; guidIndexP = null; selPath = null; limit = 400;
-  $('repoTitle').textContent = `${p.owner}/${p.name}`;
-  $('note').textContent = '';
-  $('list').innerHTML = '<div class="empty">جاري جلب الملفات…</div>';
+  if(!p){ setMsg(['badLink'], ['badLinkHint']); return; }
+  closeMenus();
+  clearView();
+  repo = p; setFiles([]); repoNote = [];
+  renderTitle(); renderNote(); renderSelbar();
+  $('list').innerHTML = `<div class="empty">${esc(t('fetching'))}</div>`;
   $('filters').innerHTML = '';
   try{
     if(!repo.branch) repo.branch = (await api(`/repos/${p.owner}/${p.name}`)).default_branch;
-    const t = await api(`/repos/${p.owner}/${p.name}/git/trees/${encodeURIComponent(repo.branch)}?recursive=1`);
-    repo.treeSha = t.sha;
-    files = t.tree.filter(x => x.type === 'blob').map(x => {
-      const name = x.path.split('/').pop();
-      const dot = name.lastIndexOf('.');
-      const ext = dot > 0 ? name.slice(dot+1).toLowerCase() : '';
-      return {path:x.path, name, dir:x.path.slice(0, -name.length-1), ext, size:x.size||0,
-              cat: ext === 'meta' ? 'meta' : (extCat[ext] || 'other')};
-    });
-    fileByPath = new Map(files.map(f => [f.path, f]));
-    files.forEach(f => { const k = f.name.toLowerCase(); if(!byName.has(k)) byName.set(k, f.path); });
-    if(t.truncated) $('note').textContent = 'المشروع كبير هواية، GitHub رجّع جزء من الملفات بس.';
-    if(!files.some(f => /(^|\/)Assets\//.test(f.path))) $('note').textContent += ' ما لكيت مجلد Assets، يمكن هذا مو مشروع Unity.';
-    try{ localStorage.setItem('lastRepo', input); }catch(e){}
+    const tr = await api(`/repos/${p.owner}/${p.name}/git/trees/${encodeURIComponent(repo.branch)}?recursive=1`);
+    if(repo !== p) return;
+    repo.treeSha = tr.sha;
+    setFiles(tr.tree.filter(x => x.type === 'blob').map(x => makeFile(x.path, x.size)));
+    if(tr.truncated) repoNote.push('truncated');
+    if(!files.some(f => /(^|\/)Assets\//.test(f.path))) repoNote.push('noAssets');
+    store.set('lastRepo', input);
     history.replaceState(null, '', '?repo=' + encodeURIComponent(`${p.owner}/${p.name}`));
-    const n3 = files.filter(f => f.cat === '3d').length;
-    setMsg('تم جلب ' + files.length + ' ملف', n3 ? `بيه ${n3} ملف 3D. اختار واحد من القائمة.` : 'ما بيه ملفات 3D.');
-    renderFilters(); renderList();
+    afterLoad();
   }catch(e){
-    $('list').innerHTML = `<div class="empty" style="color:var(--bad)">${e.message}</div>`;
-    setMsg('ما كدرت أجيب المشروع', e.message);
+    if(repo !== p) return;
+    $('list').innerHTML = `<div class="empty" style="color:var(--bad)">${esc(tx(errText(e)))}</div>`;
+    setMsg(['cantFetch'], errText(e));
   }
 }
+function afterLoad(){
+  renderTitle(); renderNote(); renderFilters(); renderList(); renderSelbar();
+  const n3 = files.filter(f => f.cat === '3d').length, n = files.length;
+  setMsg(['fetched', nf(n)], n3 ? ['has3d', nf(n3)] : ['no3d']);
+}
+function renderTitle(){
+  $('star').hidden = repo?.kind !== 'gh';
+  $('infoBtn').hidden = !files.length;
+  if(!repo){ $('repoTitle').textContent = ''; return; }
+  $('repoTitle').textContent = repo.kind === 'gh' ? `${repo.owner}/${repo.name}` : (repo.label ? t('localTitle', repo.label) : t('localFiles'));
+  const fav = repo.kind === 'gh' && favs().includes(repoKey());
+  $('star').textContent = fav ? '★' : '☆';
+  $('star').classList.toggle('on', fav);
+  $('star').dataset.tTitle = $('star').dataset.tAria = fav ? 'favRemove' : 'favAdd';
+  $('star').title = t($('star').dataset.tTitle); $('star').setAttribute('aria-label', $('star').title);
+}
+function renderNote(){ $('note').textContent = repoNote.map(k => t(k)).join(' '); }
 
-/* ---------- list ---------- */
+/* ---------- local files ---------- */
+const SKIP_DIRS = /(^|\/)(Library|Temp|Logs|obj|Obj|Build|Builds|UserSettings|\.git|\.vs|\.idea)\//;
+function loadLocal(fileList, label){
+  closeMenus();
+  const map = new Map();
+  for(const {file, path} of fileList){
+    const p = path.replace(/^\/+/, '');
+    if(SKIP_DIRS.test(p)) continue;
+    if(!map.has(p)) map.set(p, file);
+  }
+  if(!map.size) return;
+  clearView();
+  // strip a single shared top folder from paths ("MyGame/Assets/…" → "Assets/…" stays readable either way)
+  repo = {kind:'local', label:label || null, map};
+  setFiles([...map].map(([p, f]) => makeFile(p, f.size)).sort((a, b) => a.path.localeCompare(b.path)));
+  repoNote = ['localNote'];
+  history.replaceState(null, '', location.pathname);
+  afterLoad();
+  // a single viewable file → open it right away
+  const viewable = files.filter(f => VIEW3D.includes(f.ext) || f.ext === 'unity' || f.ext === 'prefab' || VIEWIMG.includes(f.ext) || VIEWAUD.includes(f.ext));
+  if(viewable.length === 1 || files.length <= 3 && viewable.length) selectRow(viewable.find(f => VIEW3D.includes(f.ext)) || viewable[0]);
+}
+$('pickFilesBtn').onclick = () => $('pickFiles').click();
+$('pickDirBtn').onclick = () => $('pickDir').click();
+$('pickFiles').onchange = e => {
+  const fl = [...e.target.files]; e.target.value = '';
+  loadLocal(fl.map(file => ({file, path:file.name})), fl.length === 1 ? fl[0].name : null);
+};
+$('pickDir').onchange = e => {
+  const fl = [...e.target.files]; e.target.value = '';
+  if(!fl.length) return;
+  const top = fl[0].webkitRelativePath.split('/')[0];
+  loadLocal(fl.map(file => ({file, path:file.webkitRelativePath.split('/').slice(1).join('/') || file.name})), top);
+};
+/* drag & drop (files and folders) */
+{
+  let depth = 0;
+  const hasFiles = e => [...(e.dataTransfer?.types || [])].includes('Files');
+  addEventListener('dragenter', e => { if(!hasFiles(e)) return; e.preventDefault(); depth++; $('drop').hidden = false; });
+  addEventListener('dragover', e => { if(hasFiles(e)) e.preventDefault(); });
+  addEventListener('dragleave', e => { if(!hasFiles(e)) return; if(--depth <= 0){ depth = 0; $('drop').hidden = true; } });
+  addEventListener('drop', async e => {
+    if(!hasFiles(e)) return;
+    e.preventDefault(); depth = 0; $('drop').hidden = true;
+    const entries = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry?.()).filter(Boolean);
+    const out = [];
+    const readAll = r => new Promise(res => { const all = []; const step = () => r.readEntries(b => { if(!b.length) return res(all); all.push(...b); step(); }, () => res(all)); step(); });
+    const walk = async (en, base) => {
+      if(en.isFile){ const file = await new Promise((res, rej) => en.file(res, rej)).catch(() => null); if(file) out.push({file, path:base + file.name}); }
+      else if(en.isDirectory){ if(SKIP_DIRS.test(base + en.name + '/')) return; for(const c of await readAll(en.createReader())) await walk(c, base + en.name + '/'); }
+    };
+    if(entries.length){
+      // a single dropped folder → paths relative to it
+      if(entries.length === 1 && entries[0].isDirectory){
+        for(const c of await readAll(entries[0].createReader())) await walk(c, '');
+        loadLocal(out, entries[0].name);
+      }else{
+        for(const en of entries) await walk(en, '');
+        loadLocal(out, out.length === 1 ? out[0].file.name : null);
+      }
+    }else{
+      const fl = [...e.dataTransfer.files];
+      loadLocal(fl.map(file => ({file, path:file.name})), null);
+    }
+  });
+}
+
+/* ---------- favorites ---------- */
+const favs = () => store.get('favRepos', []);
+function renderFav(){
+  const list = favs();
+  $('favList').innerHTML = list.length
+    ? list.map(r => `<div style="display:flex;align-items:center"><button type="button" class="mi" data-fav="${esc(r)}"><bdi>${esc(r)}</bdi></button><button type="button" class="x" data-unfav="${esc(r)}" aria-label="${esc(t('remove'))} ${esc(r)}" title="${esc(t('remove'))}">✕</button></div>`).join('')
+    : `<div class="empty">${esc(t('favEmpty'))}</div>`;
+}
+$('favList').addEventListener('click', e => {
+  const a = e.target.closest('[data-fav]'), x = e.target.closest('[data-unfav]');
+  if(x){ store.set('favRepos', favs().filter(r => r !== x.dataset.unfav)); renderFav(); renderTitle(); return; }
+  if(a){ $('url').value = a.dataset.fav; loadRepo(a.dataset.fav); }
+});
+$('star').onclick = () => {
+  const k = repoKey(); if(!k) return;
+  const list = favs();
+  store.set('favRepos', list.includes(k) ? list.filter(r => r !== k) : [k, ...list].slice(0, 50));
+  renderFav(); renderTitle();
+};
+function closeMenus(){ document.querySelectorAll('details.dd[open]').forEach(d => d.open = false); }
+document.addEventListener('click', e => { document.querySelectorAll('details.dd[open]').forEach(d => { if(!d.contains(e.target)) d.open = false; }); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMenus(); });
+
+/* =====================================================================
+   list
+   ===================================================================== */
+function matches(f){
+  if(!query) return true;
+  return query.split(/\s+/).every(w => f.lpath.includes(w));
+}
 const visible = () => files.filter(f => {
+  if(!matches(f)) return false;
   if(f.cat === 'meta') return !$('hideMeta').checked && filter === 'all';
   return filter === 'all' || f.cat === filter;
 });
 function renderFilters(){
-  const base = files.filter(f => f.cat !== 'meta');
+  const base = files.filter(f => f.cat !== 'meta' && matches(f));
+  const counts = {}; base.forEach(f => counts[f.cat] = (counts[f.cat] || 0) + 1);
   $('filters').innerHTML = CATS.map(c => {
-    const n = c.id === 'all' ? base.length : base.filter(f => f.cat === c.id).length;
-    return `<button type="button" class="chip${filter===c.id?' on':''}" data-c="${c.id}">${c.name}<span>${n}</span></button>`;
+    const n = c.id === 'all' ? base.length : counts[c.id] || 0;
+    return `<button type="button" class="chip${filter===c.id?' on':''}" data-c="${c.id}" aria-pressed="${filter===c.id}">${esc(catLabel(c.id))}<span>${nf(n)}</span></button>`;
   }).join('');
 }
-const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b/1024).toFixed(1) + ' KB' : (b/1048576).toFixed(1) + ' MB';
-const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b/1024).toFixed(1) + ' KB' : b < 1073741824 ? (b/1048576).toFixed(1) + ' MB' : (b/1073741824).toFixed(2) + ' GB';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function hl(s){
+  if(!query) return esc(s);
+  const words = query.split(/\s+/).filter(Boolean).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  if(!words.length) return esc(s);
+  const re = new RegExp('(' + words.join('|') + ')', 'ig');
+  return s.split(re).map((part, i) => i % 2 ? `<mark>${esc(part)}</mark>` : esc(part)).join('');
+}
 function renderList(){
   const v = visible();
-  if(!v.length){ $('list').innerHTML = '<div class="empty">ماكو ملفات من هالنوع</div>'; return; }
+  if(!v.length){ $('list').innerHTML = `<div class="empty">${esc(t(files.length ? 'noMatch' : 'noProject'))}</div>`; syncSelAll(v); return; }
   $('list').innerHTML = v.slice(0, limit).map(f => {
     const c = catOf(f.cat) || {cls:'cother'};
-    return `<button type="button" class="row${f.path===selPath?' sel':''}" data-p="${esc(f.path)}">
-      <span class="tag ${c.cls}">${esc(f.ext || '—')}</span>
-      <span class="nm"><b>${esc(f.name)}</b><small>${esc(f.dir || '/')}</small></span>
-      <span class="sz">${fmt(f.size)}</span></button>`;
-  }).join('') + (v.length > limit ? `<button type="button" class="btn more" id="more">اعرض أكثر (${v.length - limit} باقي)</button>` : '');
+    const p = esc(f.path);
+    return `<div class="row${f.path===selPath?' sel':''}" data-p="${p}">
+      <input type="checkbox" class="ck" ${checked.has(f.path) ? 'checked' : ''} aria-label="${esc(t('selectFile'))} ${esc(f.name)}">
+      <button type="button" class="rowmain">
+        <span class="tag ${c.cls}">${esc(f.ext || '—')}</span>
+        <span class="nm"><b>${hl(f.name)}</b><small>${hl(f.dir || '/')}</small></span>
+        <span class="sz">${fmt(f.size)}</span></button></div>`;
+  }).join('') + (v.length > limit ? `<button type="button" class="btn more" id="more">${esc(t('more', nf(v.length - limit)))}</button>` : '');
+  syncSelAll(v);
+}
+function syncSelAll(v = visible()){
+  const n = v.filter(f => checked.has(f.path)).length;
+  $('selAll').checked = v.length > 0 && n === v.length;
+  $('selAll').indeterminate = n > 0 && n < v.length;
+  $('selAll').disabled = !v.length;
+}
+function renderSelbar(){
+  $('selbar').hidden = !checked.size;
+  if(!checked.size) return;
+  let sz = 0; checked.forEach(p => sz += fileByPath.get(p)?.size || 0);
+  $('selCount').textContent = t('selected', nf(checked.size), fmt(sz));
 }
 $('filters').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if(!b) return;
   filter = b.dataset.c; limit = 400; renderFilters(); renderList(); $('list').scrollTop = 0;
 });
-$('hideMeta').addEventListener('change', () => { renderList(); });
+$('hideMeta').addEventListener('change', () => renderList());
+{
+  let tmr;
+  $('q').addEventListener('input', () => {
+    clearTimeout(tmr);
+    tmr = setTimeout(() => { query = $('q').value.trim().toLowerCase(); limit = 400; renderFilters(); renderList(); $('list').scrollTop = 0; }, 120);
+  });
+}
+$('selAll').addEventListener('change', () => {
+  const v = visible();
+  if($('selAll').checked) v.forEach(f => checked.add(f.path)); else v.forEach(f => checked.delete(f.path));
+  renderList(); renderSelbar();
+});
+$('selClear').onclick = () => { checked.clear(); renderList(); renderSelbar(); };
+function selectRow(f){
+  if(!f) return;
+  selPath = f.path;
+  document.querySelectorAll('.row.sel').forEach(x => x.classList.remove('sel'));
+  [...document.querySelectorAll('.row')].find(r => r.dataset.p === f.path)?.classList.add('sel');
+  openFile(f);
+}
 $('list').addEventListener('click', e => {
   if(e.target.id === 'more'){ limit += 400; renderList(); return; }
-  const r = e.target.closest('.row'); if(!r) return;
-  selPath = r.dataset.p;
-  document.querySelectorAll('.row.sel').forEach(x => x.classList.remove('sel'));
-  r.classList.add('sel');
-  openFile(files.find(f => f.path === selPath));
+  const row = e.target.closest('.row'); if(!row) return;
+  if(e.target.classList.contains('ck')){
+    if(e.target.checked) checked.add(row.dataset.p); else checked.delete(row.dataset.p);
+    syncSelAll(); renderSelbar(); return;
+  }
+  if(!e.target.closest('.rowmain')) return;
+  selectRow(fileByPath.get(row.dataset.p));
   if(matchMedia('(max-width:820px)').matches) $('viewer').scrollIntoView({behavior:'smooth'});
 });
 
-/* ---------- viewer ---------- */
+/* ---------- downloads ---------- */
+function saveBlob(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function downloadFile(f){
+  if(!f) return;
+  const btn = $('tDl'); btn.disabled = true;
+  try{
+    const blob = repo.kind === 'local' ? repo.map.get(f.path) : new Blob([await getBuffer(f.path)]);
+    saveBlob(blob, f.name);
+  }catch(e){ setMsg(['err'], errText(e), ghUrl(f.path)); }
+  finally{ btn.disabled = false; }
+}
+$('tDl').onclick = () => downloadFile(fileByPath.get(selPath));
+const STORED = new Set(['png','jpg','jpeg','gif','webp','mp3','ogg','zip','7z','rar','gz','mp4','unitypackage','psd','exr']);
+$('zipBtn').onclick = async () => {
+  const list = [...checked].map(p => fileByPath.get(p)).filter(Boolean);
+  if(!list.length) return;
+  const total = list.reduce((a, f) => a + f.size, 0);
+  if(total > 300 * 1048576 && !confirm(t('zipBig', fmt(total)))) return;
+  const btn = $('zipBtn'); btn.disabled = true;
+  const label = btn.innerHTML;
+  try{
+    const {zipSync} = await import('https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js');
+    const out = {}; let done = 0, failed = 0;
+    await pool(list, 6, async f => {
+      try{ out[f.path] = [new Uint8Array(await getBuffer(f.path)), {level: STORED.has(f.ext) ? 0 : 6}]; }
+      catch(e){ failed++; }
+      btn.textContent = t('zipping', ++done, list.length);
+    });
+    const zipped = zipSync(out);
+    const base = repo.kind === 'gh' ? `${repo.name}` : (repo.label || 'files').replace(/[^\w.-]+/g, '_');
+    saveBlob(new Blob([zipped], {type:'application/zip'}), `${base}-${list.length}-files.zip`);
+    if(failed) alert(t('zipSome', failed));
+  }catch(e){ alert(tx(errText(e))); }
+  finally{ btn.disabled = false; btn.innerHTML = label; }
+};
+
+/* =====================================================================
+   viewer
+   ===================================================================== */
 const view = $('viewer');
 const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -280,8 +782,10 @@ controls.enableDamping = true;
 scene.add(new THREE.HemisphereLight(0xffffff, 0x445066, 1.6));
 const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(5, 10, 7); scene.add(sun);
 let grid = new THREE.GridHelper(10, 20, 0x4c9bff, 0x3a404a); scene.add(grid);
-let current = null, mixer = null, wire = false;
+let current = null, mixer = null, wire = false, clips = [], activeClip = -1, unitToM = 1;
+let camLock = store.get('camLock', true), fittedOnce = false, measureOn = false, measureHelper = null;
 const clock = new THREE.Clock();
+$('tLock').classList.toggle('on', camLock);
 
 const resize = new ResizeObserver(() => {
   const w = view.clientWidth, h = view.clientHeight;
@@ -294,36 +798,42 @@ renderer.setAnimationLoop(() => {
   controls.update(); renderer.render(scene, camera);
 });
 
-function setMsg(title, text, link){
+/* message overlay — args may be translation keys ([key, ...args]) so they follow the language */
+let lastMsg = null;
+function setMsg(title, text, link){ lastMsg = {title, text, link}; renderMsg(); }
+function hideMsg(){ lastMsg = null; $('msg').style.display = 'none'; }
+function renderMsg(){
+  if(!lastMsg){ $('msg').style.display = 'none'; return; }
+  const {title, text, link} = lastMsg;
   $('msg').style.display = 'flex';
-  $('msg').innerHTML = `<b>${esc(title)}</b>${esc(text||'')}${link ? `<br><a href="${link}" target="_blank" rel="noopener">افتحه بـGitHub</a>` : ''}`;
+  $('msg').innerHTML = `<b>${esc(tx(title))}</b>${esc(tx(text))}${link ? `<br><a href="${esc(link)}" target="_blank" rel="noopener">${esc(t('openGh'))}</a>` : ''}`;
+}
+let infoFn = null;
+function setInfo(fn){ infoFn = fn; renderInfo(); }
+function renderInfo(){ $('info').hidden = !infoFn; if(infoFn) $('info').innerHTML = infoFn(); }
+
+function disposeObj(o){
+  o.traverse(x => {
+    x.geometry?.dispose();
+    [].concat(x.material || []).forEach(m => { Object.values(m).forEach(v => v?.isTexture && v.dispose()); m.dispose(); });
+  });
 }
 function clearModel(){
-  if(current){
-    scene.remove(current);
-    current.traverse(o => {
-      o.geometry?.dispose();
-      [].concat(o.material || []).forEach(m => { Object.values(m).forEach(v => v?.isTexture && v.dispose()); m.dispose(); });
-    });
-  }
-  current = null; mixer = null; $('info').style.display = 'none';
+  if(current){ scene.remove(current); disposeObj(current); }
+  current = null; mixer = null; clips = []; activeClip = -1; renderAnimUI();
+  setInfo(null);
   if(selHelper){ scene.remove(selHelper); selHelper = null; }
+  if(measureHelper){ scene.remove(measureHelper); measureHelper = null; }
+  $('dims').hidden = true;
   $('hier').hidden = true; $('tHier').hidden = true; $('htree').innerHTML = '';
 }
-
-async function getBuffer(path){
-  let r = await fetch(rawUrl(path));
-  if(!r.ok) throw new Error('ما كدرت أنزل الملف (' + r.status + ')');
-  let buf = await r.arrayBuffer();
-  if(buf.byteLength < 400){
-    const t = new TextDecoder().decode(buf);
-    if(t.startsWith('version https://git-lfs')){
-      r = await fetch(mediaUrl(path));
-      if(!r.ok) throw new Error('الملف محفوظ بـGit LFS وما كدرت أجيبه');
-      buf = await r.arrayBuffer();
-    }
-  }
-  return buf;
+function clearView(){
+  ++loadToken;
+  clearModel();
+  $('imgview').style.display = 'none'; $('audview').style.display = 'none';
+  $('aud').pause();
+  $('tools').hidden = true;
+  setMsg(['welcomeT'], ['welcomeX']);
 }
 
 function makeManager(){
@@ -338,9 +848,8 @@ function makeManager(){
     const tries = WEBTEX.includes(ext) ? [n] : WEBTEX.map(e => stem + '.' + e);
     const hit = tries.find(k => byName.has(k));
     if(!hit) return ext === 'tga' ? BLANK_TGA : BLANK_PNG;   // missing texture → blank, no 404
-    const f = fileByPath.get(byName.get(hit));
     if(hit.endsWith('.tga') && !n.endsWith('.tga')) return BLANK_PNG; // loader picked by original name, can't swap to TGA
-    return f && f.size < 300 ? mediaUrl(f.path) : rawUrl(f.path);  // tiny = Git LFS pointer
+    return fileUrl(fileByPath.get(byName.get(hit)));
   });
   m.addHandler(/\.tga$/i, new TGALoader(m));
   return m;
@@ -355,51 +864,69 @@ let loadToken = 0;
 async function openFile(f){
   if(!f) return;
   const token = ++loadToken;
-  $('imgview').style.display = 'none';
-  if(VIEWIMG.includes(f.ext)){
-    clearModel(); $('tools').hidden = true;
-    setMsg('جاري التحميل…', f.name);
+  $('imgview').style.display = 'none'; $('audview').style.display = 'none'; $('aud').pause();
+  const is3d = VIEW3D.includes(f.ext) || f.ext === 'unity' || f.ext === 'prefab';
+  $('tools').hidden = false; $('tools').classList.toggle('no3d', !is3d);
+  if(VIEWIMG.includes(f.ext) || VIEWAUD.includes(f.ext)){
+    clearModel();
+    setMsg(['loading'], f.name);
     try{
-      const blob = new Blob([await getBuffer(f.path)]);
+      const isAud = VIEWAUD.includes(f.ext);
+      const blob = repo.kind === 'local' ? repo.map.get(f.path) : new Blob([await getBuffer(f.path)], isAud ? {type:AUDTYPE[f.ext]} : {});
       if(token !== loadToken) return;
-      if($('img').src.startsWith('blob:')) URL.revokeObjectURL($('img').src);
-      $('img').src = URL.createObjectURL(blob);
-      $('img').onload = () => { $('msg').style.display = 'none'; $('imgview').style.display = 'flex'; };
-      $('img').onerror = () => setMsg('الصورة ما انفتحت', f.name, ghUrl(f.path));
-    }catch(e){ setMsg('صار خطأ', e.message, ghUrl(f.path)); }
+      const el = isAud ? $('aud') : $('img');
+      if(el.src.startsWith('blob:') && !(repo.kind === 'local' && [...localUrls.values()].includes(el.src))) URL.revokeObjectURL(el.src);
+      el.src = URL.createObjectURL(blob);
+      if(isAud){
+        $('audName').textContent = f.name;
+        el.onloadedmetadata = () => { if(token !== loadToken) return; hideMsg(); $('audview').style.display = 'flex'; setInfo(() => `<b>${esc(f.name)}</b> · ${fmt(f.size)}` + (isFinite(el.duration) ? ` · ${el.duration.toFixed(1)}s` : '')); };
+        el.onerror = () => { if(token === loadToken) setMsg(['audFail'], f.name, ghUrl(f.path)); };
+      }else{
+        el.onload = () => { if(token !== loadToken) return; hideMsg(); $('imgview').style.display = 'flex'; setInfo(() => `<b>${esc(f.name)}</b> · ${el.naturalWidth}×${el.naturalHeight} · ${fmt(f.size)}`); };
+        el.onerror = () => { if(token === loadToken) setMsg(['imgFail'], f.name, ghUrl(f.path)); };
+      }
+    }catch(e){ setMsg(['err'], errText(e), ghUrl(f.path)); }
     return;
   }
-  if(!VIEW3D.includes(f.ext) && f.ext !== 'unity' && f.ext !== 'prefab'){
-    clearModel(); $('tools').hidden = true;
-    const why = ['blend','max','ma','mb'].includes(f.ext) ? 'ملفات ' + f.ext + ' تحتاج برنامجها الأصلي، ما تنعرض بالمتصفح.' : 'هذا الملف مو 3D، تكدر تشوفه بـGitHub.';
+  if(!is3d){
+    clearModel();
+    const why = ['blend','max','ma','mb'].includes(f.ext) ? ['needApp', f.ext] : [repo.kind === 'gh' ? 'notViewable' : 'notViewableLocal'];
     setMsg(f.name, why, ghUrl(f.path));
     return;
   }
   clearModel();
   const isUnity = f.ext === 'unity' || f.ext === 'prefab';
-  setMsg(isUnity ? 'جاري قراءة الملف…' : 'جاري تحميل الموديل…', f.name + ' · ' + fmt(f.size));
+  setMsg([isUnity ? 'readingFile' : 'loadingModel'], f.name + ' · ' + fmt(f.size));
   try{
-    const {obj, anims, extra} = isUnity ? await buildUnityFile(f, token) : await loadModelObject(f);
-    if(token !== loadToken) return;
+    const res = isUnity ? await buildUnityFile(f, token) : await loadModelObject(f);
+    const {anims, extra} = res;
+    let obj = res.obj;
+    if(token !== loadToken){ disposeObj(obj); return; }
+    // show every model in metres so a locked camera stays meaningful between files
+    if((res.unit ?? 1) !== 1){ const w = new THREE.Group(); w.add(obj); w.scale.setScalar(res.unit); obj = w; }
     current = obj; scene.add(obj);
+    obj.updateMatrixWorld(true);      // bones must be posed before skinned bounding boxes get computed (and cached)
+    unitToM = 1;
     const s = prepAndCount(obj);
-    if(anims.length){ mixer = new THREE.AnimationMixer(obj); mixer.clipAction(anims[0]).play(); }
-    fit();
-    $('msg').style.display = 'none'; $('tools').hidden = false;
-    $('info').style.display = 'block';
-    $('info').innerHTML = `<b>${esc(f.name)}</b>` + (extra || '') + ` · ${s.meshes} ميش · ${Math.round(s.verts).toLocaleString('en')} نقطة · ${Math.round(s.tris).toLocaleString('en')} مثلث`
-      + (anims.length ? ` · ${anims.length} أنيميشن (يشتغل الأول)` : '');
+    clips = anims || [];
+    if(clips.length){ mixer = new THREE.AnimationMixer(obj); mixer.timeScale = +$('aSpeed').value; playClip(0); }
+    renderAnimUI();
+    frame(false);
+    hideMsg();
+    setInfo(() => `<b>${esc(f.name)}</b>` + (extra ? extra() : '') + ` · ${t('meshes', nf(s.meshes))} · ${t('verts', nf(s.verts))} · ${t('tris', nf(s.tris))}`
+      + (clips.length ? ` · ${t('animsN', clips.length)}` : ''));
     if(isUnity) showHierarchy(obj);
+    if(measureOn) updateMeasure();
   }catch(e){
     if(token !== loadToken) return;
-    console.warn(e); clearModel(); $('tools').hidden = true;
-    setMsg(isUnity ? 'ما كدرت أعرض الملف' : 'ما كدرت أعرض الموديل', e.message || String(e), ghUrl(f.path));
+    console.warn(e); clearModel();
+    setMsg([isUnity ? 'cantShowFile' : 'cantShowModel'], errText(e), ghUrl(f.path));
   }
 }
 
 /* loads any supported 3D file into a three.js object (no scene changes) */
 async function loadModelObject(f){
-  const base = rawUrl(f.dir ? f.dir + '/' : '').replace(/[^/]*$/, '');
+  const base = repo.kind === 'gh' ? rawUrl(f.dir ? f.dir + '/' : '').replace(/[^/]*$/, '') : '';
   const mgr = makeManager();
   const mat = () => new THREE.MeshStandardMaterial({color:0xc9ced6, roughness:.6, metalness:.1});
   const buf = await getBuffer(f.path);
@@ -409,15 +936,17 @@ async function loadModelObject(f){
     case 'gltf': case 'glb': { const g = await parseP(new GLTFLoader(mgr), buf, base); obj = g.scene; anims = g.animations; break; }
     case 'fbx': obj = new FBXLoader(mgr).parse(buf, base); anims = obj.animations || []; break;
     case 'obj': obj = new OBJLoader(mgr).parse(text()); break;
-    case 'dae': obj = new ColladaLoader(mgr).parse(text(), base).scene; break;
+    case 'dae': { const c = new ColladaLoader(mgr).parse(text(), base); obj = c.scene; anims = c.animations || obj.animations || []; break; }
     case '3ds': obj = new TDSLoader(mgr).parse(buf, base); break;
     case 'stl': { const g = new STLLoader().parse(buf); g.computeVertexNormals(); obj = new THREE.Mesh(g, mat()); break; }
     case 'ply': { const g = new PLYLoader().parse(buf); g.computeVertexNormals();
       const m = mat(); if(g.attributes.color){ m.vertexColors = true; m.color.set(0xffffff); }
       obj = new THREE.Mesh(g, m); break; }
-    default: throw new Error('نوع غير مدعوم: ' + f.ext);
+    default: throw new TErr('unsupported', f.ext);
   }
-  return {obj, anims};
+  // FBX keeps file units (usually cm); everything else is treated as metres
+  const unit = f.ext === 'fbx' ? (obj.userData.unitScaleFactor ?? 1) / 100 : 1;
+  return {obj, anims, unit};
 }
 
 function prepAndCount(obj){
@@ -430,23 +959,120 @@ function prepAndCount(obj){
       if(!m) return;
       m.wireframe = wire;
       // drop placeholder textures with no image (e.g. missing .dds) — they render black
-      for(const k in m){ const t = m[k]; if(t && t.isTexture && !t.image && !t.isDataTexture){ m[k] = null; m.needsUpdate = true; } }
+      for(const k in m){ const tt = m[k]; if(tt && tt.isTexture && !tt.image && !tt.isDataTexture){ m[k] = null; m.needsUpdate = true; } }
     });
   });
   return {verts, tris, meshes};
 }
+
+/* camera: fit on first model / reset button; otherwise (locked) keep where it is */
+function frame(force){
+  if(!current) return;
+  const box = new THREE.Box3().setFromObject(current);
+  if(box.isEmpty()) return;
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  const r = Math.max(size.x, size.y, size.z) || 1;
+  // locked camera: stay put, unless the new model is completely out of view
+  let inView = true;
+  if(camLock && fittedOnce && !force){
+    camera.updateMatrixWorld();
+    const fr = new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    const camFar = camera.far; camera.far = Math.max(camFar, camera.position.distanceTo(center) + r * 2); camera.updateProjectionMatrix();
+    fr.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    inView = fr.intersectsBox(box);
+  }
+  const move = force || !camLock || !fittedOnce || !inView;
+  if(move){
+    const d = r / (2 * Math.tan(camera.fov * Math.PI / 360)) * 1.6;
+    camera.position.copy(center).add(new THREE.Vector3(1, .7, 1).normalize().multiplyScalar(d));
+    controls.target.copy(center); controls.update();
+    fittedOnce = true;
+  }
+  const dist = camera.position.distanceTo(center);
+  camera.near = Math.max(Math.min(r, dist) / 1000, 1e-4);
+  camera.far = Math.max(r * 1000, (dist + r) * 10);
+  camera.updateProjectionMatrix();
+  const vis = grid.visible; scene.remove(grid); grid.geometry.dispose();
+  grid = new THREE.GridHelper(r * 4, 20, 0x4c9bff, 0x3a404a);
+  grid.position.set(center.x, box.min.y, center.z); grid.visible = vis; scene.add(grid);
+}
+
+/* ---------- animations ---------- */
+function playClip(i){
+  if(!mixer || !clips[i]) return;
+  mixer.stopAllAction();
+  const a = mixer.clipAction(clips[i]);
+  a.reset(); a.paused = false; a.play();
+  activeClip = i;
+  renderAnimUI();
+}
+function renderAnimUI(){
+  $('anim').hidden = !clips.length;
+  if(!clips.length) return;
+  $('clips').innerHTML = clips.map((c, i) => `<button type="button" class="clip${i === activeClip ? ' on' : ''}" data-i="${i}" aria-pressed="${i === activeClip}"><bdi>${esc(c.name || ('Clip ' + (i + 1)))}</bdi><small>${c.duration.toFixed(2)}s</small></button>`).join('');
+  const a = activeClip >= 0 && mixer ? mixer.clipAction(clips[activeClip]) : null;
+  $('aPlay').textContent = a && !a.paused && a.isRunning() ? t('pause') : t('play');
+}
+$('clips').addEventListener('click', e => { const b = e.target.closest('.clip'); if(b) playClip(+b.dataset.i); });
+$('aPlay').onclick = () => {
+  if(!mixer) return;
+  if(activeClip < 0) return playClip(0);
+  const a = mixer.clipAction(clips[activeClip]);
+  if(!a.isRunning() && !a.paused){ a.reset().play(); } else a.paused = !a.paused;
+  renderAnimUI();
+};
+$('aSpeed').oninput = e => { const v = +e.target.value; $('aSpeedV').textContent = v.toFixed(1) + '×'; if(mixer) mixer.timeScale = v; };
+
+/* ---------- measure ---------- */
+function fmtLen(units){
+  const m = units * unitToM;
+  return m < 1 ? `${(m * 100).toFixed(m < .1 ? 1 : 0)} ${t('cmU')}` : `${m.toFixed(2)} ${t('mU')}`;
+}
+function updateMeasure(){
+  if(measureHelper){ scene.remove(measureHelper); measureHelper = null; }
+  $('dims').hidden = true;
+  if(!measureOn || !current) return;
+  const box = new THREE.Box3();
+  current.traverse(o => { if(o.isMesh && o.visible && !o.userData.placeholder) box.expandByObject(o); });
+  if(box.isEmpty()) return;
+  const s = box.getSize(new THREE.Vector3());
+  measureHelper = new THREE.Box3Helper(box, 0xffb84c); scene.add(measureHelper);
+  $('dims').textContent = t('dims', fmtLen(s.x), fmtLen(s.y), fmtLen(s.z));
+  $('dims').hidden = false;
+}
+$('tMeasure').onclick = e => { measureOn = !measureOn; e.currentTarget.classList.toggle('on', measureOn); updateMeasure(); };
+
+/* ---------- screenshot ---------- */
+$('tShot').onclick = () => {
+  if(!current) return;
+  const hide = [grid, selHelper, measureHelper].filter(Boolean), was = hide.map(o => o.visible);
+  hide.forEach(o => o.visible = false);
+  renderer.render(scene, camera);
+  renderer.domElement.toBlob(b => {
+    if(b) saveBlob(b, (fileByPath.get(selPath)?.name || 'model').replace(/\.[^.]+$/, '') + '.png');
+  }, 'image/png');
+  hide.forEach((o, i) => o.visible = was[i]);
+};
+
+$('tFit').onclick = () => frame(true);
+$('tLock').onclick = e => { camLock = !camLock; store.set('camLock', camLock); e.currentTarget.classList.toggle('on', camLock); };
+$('tWire').onclick = e => {
+  wire = !wire; e.currentTarget.classList.toggle('on', wire);
+  current?.traverse(o => o.isMesh && !o.userData.placeholder && [].concat(o.material).forEach(m => { if(m) m.wireframe = wire; }));
+};
+$('tGrid').onclick = e => { grid.visible = !grid.visible; e.currentTarget.classList.toggle('on', grid.visible); };
+$('tSpin').onclick = e => { controls.autoRotate = !controls.autoRotate; e.currentTarget.classList.toggle('on', controls.autoRotate); };
 
 /* =====================================================================
    Unity .unity / .prefab  (text-serialized YAML)
    ===================================================================== */
 const BUILTIN_EXTRA = '0000000000000000e000000000000000';   // Library/unity default resources (primitives)
 const UNITY_PARSE = new Set([4, 224, 33, 23, 137, 1001, 21]); // classes we fully parse
-const td = new TextDecoder();
 const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
 
 /* split a Unity YAML file into documents; heavy/unneeded classes are only regex-scanned */
 function parseUnityYaml(text){
-  if(!/^%YAML/.test(text)) throw new Error('هذا الملف محفوظ بصيغة Binary. بـUnity لازم Asset Serialization = Force Text حتى ينقرا.');
+  if(!/^%YAML/.test(text)) throw new TErr('binaryScene');
   const heads = [], re = /^--- !u!(\d+) &(-?\d+)( stripped)?[^\n]*\n/gm;
   let m;
   while((m = re.exec(text))) heads.push({cls:+m[1], id:m[2], stripped:!!m[3], start:re.lastIndex, at:m.index});
@@ -476,44 +1102,44 @@ function parseUnityYaml(text){
   return docs;
 }
 
-/* ---- GUID index from .meta files (fetched from raw.githubusercontent, no API quota) ---- */
-/* phase A (needed to draw): models, prefabs, materials, textures. phase B (labels only): scripts, in background.
-   The finished index is kept in localStorage per repo tree SHA, so it is built once. */
+/* ---- GUID index from .meta files ----
+   phase A (needed to draw): models, prefabs, materials, textures. phase B (labels only): scripts, in background.
+   On GitHub the finished index is kept in localStorage per repo tree SHA, so it is built once. */
 let guidIndex = null, guidIndexP = null, scriptsReady = false;
 const IDX_A = [...VIEW3D, 'prefab', 'mat', ...WEBTEX, 'psd', 'tif', 'tiff'];
-const idxKey = () => `gidx:${repo.owner}/${repo.name}@${repo.treeSha}`;
+const idxKey = () => repo.kind === 'gh' ? `gidx:${repo.owner}/${repo.name}@${repo.treeSha}` : null;
 function metaTodo(exts){
   return files.filter(f => f.cat === 'meta').map(f => {
     const asset = f.path.slice(0, -5), ext = (asset.split('/').pop().match(/\.([^.]+)$/) || [])[1]?.toLowerCase() || '';
     return {meta:f.path, asset, ext};
-  }).filter(x => exts.includes(x.ext)).slice(0, 4000);
+  }).filter(x => exts.includes(x.ext)).slice(0, 6000);
 }
 async function indexMetas(todo, map, onProgress){
   let done = 0;
-  await pool(todo, 48, async x => {
-    const r = await fetch(rawUrl(x.meta));
-    if(r.ok){
-      const t = await r.text(), g = (t.match(/^guid: ([0-9a-f]{32})/m) || [])[1];
-      if(g) map.set(g, {path:x.asset, ext:x.ext});
-    }
+  await pool(todo, repo.kind === 'local' ? 16 : 48, async x => {
+    const tt = await readText(x.meta), g = (tt.match(/^guid: ([0-9a-f]{32})/m) || [])[1];
+    if(g) map.set(g, {path:x.asset, ext:x.ext});
     onProgress?.(++done, todo.length);
   });
 }
 function buildGuidIndex(onProgress, onScripts){
   if(guidIndex) return Promise.resolve(guidIndex);
   if(guidIndexP) return guidIndexP;
-  try{
-    const c = JSON.parse(localStorage.getItem(idxKey()) || 'null');
+  const key = idxKey(), forRepo = repo;
+  if(key){
+    const c = store.get(key, null);
     if(c){ guidIndex = new Map(c.map(([g, p]) => [g, {path:p, ext:(p.match(/\.([^.]+)$/) || [])[1]?.toLowerCase() || ''}])); scriptsReady = true; return Promise.resolve(guidIndex); }
-  }catch(e){}
+  }
   const map = new Map();
   guidIndexP = indexMetas(metaTodo(IDX_A), map, onProgress).then(() => {
+    if(repo !== forRepo) return map;
     guidIndex = map;
     indexMetas(metaTodo(['cs']), map).then(() => {
+      if(repo !== forRepo) return;
       scriptsReady = true;
-      try{
-        for(let i = localStorage.length - 1; i >= 0; i--){ const k = localStorage.key(i); if(k?.startsWith('gidx:') && k !== idxKey()) localStorage.removeItem(k); }
-        localStorage.setItem(idxKey(), JSON.stringify([...map].map(([g, v]) => [g, v.path])));
+      if(key) try{
+        for(let i = localStorage.length - 1; i >= 0; i--){ const k = localStorage.key(i); if(k?.startsWith('gidx:') && k !== key) localStorage.removeItem(k); }
+        localStorage.setItem(key, JSON.stringify([...map].map(([g, v]) => [g, v.path])));
       }catch(e){}
       onScripts?.();
     });
@@ -529,20 +1155,20 @@ async function pool(items, n, fn){
 }
 
 /* model .meta → fileID tables, import scale, material remaps */
-function parseModelMeta(t){
+function parseModelMeta(tt){
   const table = new Map();                 // fileID → {cls, name}
-  const sec = t.match(/fileIDToRecycleName:\n((?: {4}.*\n)+)/);
-  if(sec) for(const l of sec[1].split('\n')){
+  const sec = tt.match(/fileIDToRecycleName:\r?\n((?: {4}.*\r?\n)+)/);
+  if(sec) for(const l of sec[1].split(/\r?\n/)){
     const m = l.match(/^ {4}(-?\d+): (.*)$/); if(m) table.set(m[1], {cls:Math.floor(Math.abs(+m[1]) / 100000), name:m[2].trim()});
   }
-  for(const m of t.matchAll(/- first:\s*\n\s*(\d+): (-?\d+)\s*\n\s*second: (.*)/g)) table.set(m[2], {cls:+m[1], name:m[3].trim()});
+  for(const m of tt.matchAll(/- first:\s*\n\s*(\d+): (-?\d+)\s*\n\s*second: (.*)/g)) table.set(m[2], {cls:+m[1], name:m[3].trim()});
   const ext = new Map();
-  for(const m of t.matchAll(/type: UnityEngine:Material\s*\n\s*assembly: .*\n\s*name: (.*)\n\s*second: \{fileID: -?\d+, guid: ([0-9a-f]{32})/g)) ext.set(m[1].trim(), m[2]);
+  for(const m of tt.matchAll(/type: UnityEngine:Material\s*\n\s*assembly: .*\n\s*name: (.*)\n\s*second: \{fileID: -?\d+, guid: ([0-9a-f]{32})/g)) ext.set(m[1].trim(), m[2]);
   return {
     table, extMats: ext,
-    globalScale: num((t.match(/globalScale: ([\d.eE+-]+)/) || [])[1], 1),
-    useFileScale: +((t.match(/useFileScale: (\d)/) || [])[1] ?? 1),
-    preserveHierarchy: +((t.match(/preserveHierarchy: (\d)/) || [])[1] ?? 0),
+    globalScale: num((tt.match(/globalScale: ([\d.eE+-]+)/) || [])[1], 1),
+    useFileScale: +((tt.match(/useFileScale: (\d)/) || [])[1] ?? 1),
+    preserveHierarchy: +((tt.match(/preserveHierarchy: (\d)/) || [])[1] ?? 0),
   };
 }
 
@@ -578,27 +1204,27 @@ const defaultMat = () => new THREE.MeshStandardMaterial({color:0xcfd3da, roughne
 const placeholderMat = new THREE.MeshBasicMaterial({color:0x8892a0, wireframe:true, transparent:true, opacity:.45});
 
 async function buildUnityFile(f, token){
-  const text = td.decode(await getBuffer(f.path));
+  const text = await readText(f.path);
   const docs = parseUnityYaml(text);
   const needIndex = /guid: (?!0{16})[0-9a-f]{32}/.test(text);
   if(needIndex && files.some(x => x.cat === 'meta')){
     await buildGuidIndex(
-      (d, n) => { if(token === loadToken && d % 20 === 0) setMsg('جاري فهرسة ملفات ‎.meta… (أول مرة بس)', `${d} / ${n}`); },
+      (d, n) => { if(token === loadToken && d % 20 === 0) setMsg(['indexing'], `${d} / ${n}`); },
       () => { if(current && !$('tHier').hidden) showHierarchy(current, true); });
   }
   if(token !== loadToken) return {obj:new THREE.Group(), anims:[]};
-  setMsg('جاري بناء المشهد…', f.name);
-  const ctx = {models:new Map(), mats:new Map(), texs:new Map(), docCache:new Map([[f.path, docs]]),
+  setMsg(['building'], f.name);
+  const ctx = {models:new Map(), mats:new Map(), texs:new Map(), docCache:new Map([[f.path, Promise.resolve(docs)]]),
                stats:{gos:0, inst:0, missing:0, missingPrefabs:0}};
   const root = new THREE.Group();
   root.name = f.name; root.userData.h = {name:f.name, comps:[], isRoot:true};
   const res = await buildDocs(docs, ctx, 0, [f.path]);
   res.roots.forEach(r => root.add(r));
   const st = ctx.stats;
-  const extra = ` · ${st.gos} GameObject` + (st.inst ? ` · ${st.inst} Prefab` : '')
-    + (st.missing ? ` · <span style="color:var(--accent2)">${st.missing} ميش ما انلكى</span>` : '')
-    + (st.missingPrefabs ? ` · <span style="color:var(--accent2)">${st.missingPrefabs} Prefab ما انلكى</span>` : '');
-  return {obj:root, anims:[], extra};
+  const extra = () => ` · ${t('gos', nf(st.gos))}` + (st.inst ? ` · ${t('prefabsN', nf(st.inst))}` : '')
+    + (st.missing ? ` · <span style="color:var(--accent2)">${esc(t('missingMesh', st.missing))}</span>` : '')
+    + (st.missingPrefabs ? ` · <span style="color:var(--accent2)">${esc(t('missingPrefab', st.missingPrefabs))}</span>` : '');
+  return {obj:root, anims:[], extra, unit:1};
 }
 
 const guidPath = g => guidIndex?.get(g);
@@ -656,15 +1282,15 @@ async function buildDocs(docs, ctx, depth, stack){
   // parent transforms (respect m_Children order)
   const placed = new Set();
   const attach = id => {
-    const t = tnodes.get(id); if(!t || placed.has(id)) return; placed.add(id);
-    const p = t.father !== '0' ? byId.get(t.father) : null;
-    if(p) p.add(t.n); else roots.push(t.n);
-    t.kids.forEach(attach);
+    const tn = tnodes.get(id); if(!tn || placed.has(id)) return; placed.add(id);
+    const p = tn.father !== '0' ? byId.get(tn.father) : null;
+    if(p) p.add(tn.n); else roots.push(tn.n);
+    tn.kids.forEach(attach);
   };
-  for(const [id, t] of tnodes) if(t.father === '0' || !tnodes.has(t.father)) attach(id);
+  for(const [id, tn] of tnodes) if(tn.father === '0' || !tnodes.has(tn.father)) attach(id);
   for(const id of tnodes.keys()) attach(id);
   // prefab instances → their parent
-  for(const [id, r] of insts){
+  for(const [, r] of insts){
     const p = r.parent !== '0' ? byId.get(r.parent) : null;
     if(p) p.add(r.root); else roots.push(r.root);
   }
@@ -720,7 +1346,7 @@ function modelFor(info, ctx){
     try{
       const [{obj}, metaText] = await Promise.all([
         loadModelObject(f),
-        fetch(rawUrl(info.path + '.meta')).then(r => r.ok ? r.text() : '').catch(() => '')]);
+        fileByPath.has(info.path + '.meta') ? readText(info.path + '.meta').catch(() => '') : '']);
       const meta = parseModelMeta(metaText);
       const usf = obj.userData.unitScaleFactor ?? 1;
       const us = meta.globalScale * (f.ext === 'fbx' && meta.useFileScale ? usf / 100 : 1);
@@ -748,7 +1374,7 @@ const toDict = list => {
   return o;
 };
 async function loadMat(path, ctx){
-  const docs = parseUnityYaml(td.decode(await getBuffer(path)));
+  const docs = parseUnityYaml(await readText(path));
   const d = [...docs.values()].find(x => x.cls === 21)?.d; if(!d) return null;
   const sp = d.m_SavedProperties || {};
   const colors = toDict(sp.m_Colors), texs = toDict(sp.m_TexEnvs), floats = toDict(sp.m_Floats);
@@ -763,15 +1389,15 @@ async function loadMat(path, ctx){
   const kw = String(d.m_ShaderKeywords || '') + ' ' + JSON.stringify(d.m_ValidKeywords || []);
   const ec = colors._EmissionColor;
   if(ec && /_EMISSION/.test(kw)) m.emissive.setRGB(Math.min(1, num(ec.r, 0)), Math.min(1, num(ec.g, 0)), Math.min(1, num(ec.b, 0)), THREE.SRGBColorSpace);
-  const t = texs._BaseMap || texs._MainTex || texs._BaseColorMap || texs._Albedo;
-  const tg = t?.m_Texture?.guid;
+  const tx0 = texs._BaseMap || texs._MainTex || texs._BaseColorMap || texs._Albedo;
+  const tg = tx0?.m_Texture?.guid;
   if(tg && tg !== '0'){
     const tex = await texFor(tg, ctx);
     if(tex){
       const tt = tex.clone(); tt.needsUpdate = true;
       tt.wrapS = tt.wrapT = THREE.RepeatWrapping;
-      if(t.m_Scale) tt.repeat.set(num(t.m_Scale.x, 1), num(t.m_Scale.y, 1));
-      if(t.m_Offset) tt.offset.set(num(t.m_Offset.x, 0), num(t.m_Offset.y, 0));
+      if(tx0.m_Scale) tt.repeat.set(num(tx0.m_Scale.x, 1), num(tx0.m_Scale.y, 1));
+      if(tx0.m_Offset) tt.offset.set(num(tx0.m_Offset.x, 0), num(tx0.m_Offset.y, 0));
       m.map = tt;
     }
   }
@@ -787,8 +1413,7 @@ function texFor(guid, ctx){
       const alt = WEBTEX.map(e => byName.get(stem + '.' + e)).find(Boolean);
       if(!alt) return null; f = fileByPath.get(alt);
     }
-    const url = f.size < 300 ? mediaUrl(f.path) : rawUrl(f.path);
-    const tex = await (f.ext === 'tga' ? new TGALoader() : new THREE.TextureLoader()).loadAsync(url);
+    const tex = await (f.ext === 'tga' ? new TGALoader() : new THREE.TextureLoader()).loadAsync(fileUrl(f));
     tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   })().catch(() => null);
@@ -805,7 +1430,7 @@ async function buildInstance(d, ctx, depth, stack){
   let root = null, map = new Map();
   if(info && info.ext === 'prefab' && depth < 6 && !stack.includes(info.path)){
     try{
-      if(!ctx.docCache.has(info.path)) ctx.docCache.set(info.path, getBuffer(info.path).then(b => parseUnityYaml(td.decode(b))));
+      if(!ctx.docCache.has(info.path)) ctx.docCache.set(info.path, readText(info.path).then(parseUnityYaml));
       const docs = await ctx.docCache.get(info.path);
       const r = await buildDocs(docs, ctx, depth + 1, [...stack, info.path]);
       root = r.roots.length === 1 ? r.roots[0] : new THREE.Group();
@@ -920,13 +1545,13 @@ function showHierarchy(root, refresh){
     const cls = ['hn', h.prefab ? 'pf' : '', h.model ? 'md' : '', h.missing ? 'miss' : '', o.visible === false || h.active === false ? 'off' : ''].join(' ');
     const comps = (h.comps || []).map(compName).filter(c => c !== 'Transform' && c !== 'RectTransform');
     const tip = comps.length ? ` title="${esc(comps.join(', '))}"` : '';
-    const nm = `<button type="button" class="${cls}" data-u="${o.uuid}"${tip}><bdi>${esc(String(label(o)) || '(بلا اسم)')}</bdi>${comps.length ? `<small>${esc(comps.slice(0, 4).join(' · '))}${comps.length > 4 ? ' …' : ''}</small>` : ''}</button>`;
+    const nm = `<button type="button" class="${cls}" data-u="${o.uuid}"${tip}><bdi>${esc(String(label(o)) || t('noName'))}</bdi>${comps.length ? `<small>${esc(comps.slice(0, 4).join(' · '))}${comps.length > 4 ? ' …' : ''}</small>` : ''}</button>`;
     if(!flat.length){ rows.push(`<div class="hl">${nm}</div>`); return; }
     rows.push(`<details${(open ? open.has(o.uuid) : depth < 1) ? ' open' : ''}><summary>${nm}</summary>`);
     flat.forEach(c => walk(c, depth + 1));
     rows.push('</details>');
   };
-  if(rows.length < 20000) walk(root, 0);
+  walk(root, 0);
   $('htree').innerHTML = rows.join('');
   if(refresh){
     $('htree').scrollTop = scroll;
@@ -947,7 +1572,7 @@ function selectNode(o){
     b.scrollIntoView({block:'nearest'});
   }
   const box = new THREE.Box3().setFromObject(o);
-  if(!box.isEmpty()){ selHelper = new THREE.Box3Helper(box, 0xffb84c); scene.add(selHelper); }
+  if(!box.isEmpty()){ selHelper = new THREE.Box3Helper(box, 0x4c9bff); scene.add(selHelper); }
 }
 function focusNode(o){
   const box = new THREE.Box3().setFromObject(o); if(box.isEmpty()) return;
@@ -956,14 +1581,19 @@ function focusNode(o){
   const d = r / (2 * Math.tan(camera.fov * Math.PI / 360)) * 1.8;
   const dir = camera.position.clone().sub(controls.target).normalize();
   controls.target.copy(c); camera.position.copy(c).add(dir.multiplyScalar(d)); controls.update();
+  camera.near = Math.max(r / 1000, 1e-4); camera.updateProjectionMatrix();
 }
 $('htree').addEventListener('click', e => {
   const b = e.target.closest('.hn'); if(!b) return;
   if(e.target.closest('summary') && e.detail === 0) return;      // keyboard toggle on summary
   const o = current?.getObjectByProperty('uuid', b.dataset.u); if(!o) return;
-  selectNode(o);
   if(e.target.closest('summary')) e.preventDefault();             // don't collapse on select
-  focusNode(o);
+  selectNode(o);
+  if(!camLock) focusNode(o);                                      // locked camera: select only
+});
+$('htree').addEventListener('dblclick', e => {
+  const b = e.target.closest('.hn'); if(!b) return;
+  const o = current?.getObjectByProperty('uuid', b.dataset.u); if(o) focusNode(o);
 });
 $('tHier').onclick = e => { $('hier').hidden = !$('hier').hidden; e.currentTarget.classList.toggle('on', !$('hier').hidden); };
 // click a mesh in 3D → select its GameObject
@@ -981,34 +1611,72 @@ $('tHier').onclick = e => { $('hier').hidden = !$('hier').hidden; e.currentTarge
   });
 }
 
-function fit(){
-  if(!current) return;
-  const box = new THREE.Box3().setFromObject(current);
-  if(box.isEmpty()) return;
-  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
-  const r = Math.max(size.x, size.y, size.z) || 1;
-  const d = r / (2 * Math.tan(camera.fov * Math.PI / 360)) * 1.6;
-  camera.near = r / 1000; camera.far = r * 1000; camera.updateProjectionMatrix();
-  camera.position.copy(center).add(new THREE.Vector3(1, .7, 1).normalize().multiplyScalar(d));
-  controls.target.copy(center); controls.update();
-  const vis = grid.visible; scene.remove(grid);
-  grid = new THREE.GridHelper(r * 4, 20, 0x4c9bff, 0x3a404a);
-  grid.position.set(center.x, box.min.y, center.z); grid.visible = vis; scene.add(grid);
+/* =====================================================================
+   project info
+   ===================================================================== */
+$('infoBtn').onclick = () => { $('infoDlg').showModal(); renderProjectInfo(); };
+$('infoClose').onclick = () => $('infoDlg').close();
+$('infoDlg').addEventListener('click', e => { if(e.target === $('infoDlg')) $('infoDlg').close(); });
+let infoToken = 0;
+async function renderProjectInfo(){
+  const tok = ++infoToken, body = $('infoBody');
+  body.innerHTML = `<p class="dnote">${esc(t('loadingInfo'))}</p>`;
+  const real = files.filter(f => f.cat !== 'meta');
+  const total = files.reduce((a, f) => a + f.size, 0);
+  const BIN = new Set(['fbx','obj','png','jpg','jpeg','tga','psd','tif','tiff','exr','wav','mp3','ogg','glb','blend','max','unitypackage','dll','so','a','mp4','ttf','otf']);
+  const lfs = files.filter(f => f.size > 0 && f.size < 200 && BIN.has(f.ext)).length;
+  const counts = {}; real.forEach(f => counts[f.cat] = (counts[f.cat] || 0) + 1);
+  const scenes = real.filter(f => f.ext === 'unity').length;
+  // each Unity project = folder containing ProjectSettings/ProjectVersion.txt
+  const roots = files.filter(f => /(^|\/)ProjectSettings\/ProjectVersion\.txt$/.test(f.path))
+    .map(f => f.path.replace(/ProjectSettings\/ProjectVersion\.txt$/, ''))
+    .sort((a, b) => a.length - b.length).slice(0, 8);
+  const projects = await Promise.all(roots.map(async root => {
+    const info = {root, version:'', product:'', company:'', packages:[], pipeline:''};
+    const get = p => fileByPath.has(root + p) ? readText(root + p).catch(() => '') : Promise.resolve('');
+    const [ver, man, ps] = await Promise.all([get('ProjectSettings/ProjectVersion.txt'), get('Packages/manifest.json'), get('ProjectSettings/ProjectSettings.asset')]);
+    info.version = (ver.match(/m_EditorVersionWithRevision: (.+)/) || ver.match(/m_EditorVersion: (.+)/) || [])[1]?.trim() || '';
+    info.product = (ps.match(/^\s*productName: (.*)$/m) || [])[1]?.trim() || '';
+    info.company = (ps.match(/^\s*companyName: (.*)$/m) || [])[1]?.trim() || '';
+    try{ info.packages = Object.entries(JSON.parse(man).dependencies || {}); }catch(e){ info.packages = null; }
+    const names = (info.packages || []).map(([n]) => n);
+    info.pipeline = names.includes('com.unity.render-pipelines.high-definition') ? 'HDRP'
+      : names.includes('com.unity.render-pipelines.universal') ? 'URP (Universal)'
+      : names.includes('com.unity.render-pipelines.lightweight') ? 'LWRP' : t('builtin');
+    const assets = files.filter(f => f.path.startsWith(root + 'Assets/'));
+    info.assetsSize = assets.reduce((a, f) => a + f.size, 0);
+    info.assetsFiles = assets.filter(f => f.cat !== 'meta').length;
+    return info;
+  }));
+  if(tok !== infoToken) return;
+  const dl = pairs => `<dl class="kv">${pairs.filter(p => p[1] !== '' && p[1] != null).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
+  let html = dl([
+    [t('fileCount'), nf(real.length)],
+    [t('totalSize'), fmt(total)],
+    [t('scenes'), nf(scenes)],
+    ...CATS.filter(c => c.id !== 'all' && counts[c.id]).map(c => [catLabel(c.id), nf(counts[c.id])]),
+  ]);
+  if(lfs) html += `<p class="dnote">${esc(t('lfsNote', nf(lfs)))}</p>`;
+  if(!projects.length) html += `<p class="dnote" style="color:var(--accent2)">${esc(t('noUnity'))}</p>`;
+  for(const p of projects){
+    html += `<section class="proj"><h3>${esc(p.root ? p.root.replace(/\/$/, '') : (repo.kind === 'gh' ? repo.name : repo.label))}</h3>`
+      + dl([[t('unityVer'), p.version], [t('productName'), p.product], [t('company'), p.company], [t('pipeline'), p.pipeline], [t('assetsSize'), `${fmt(p.assetsSize)} · ${nf(p.assetsFiles)}`]])
+      + (p.packages === null || !p.packages.length ? `<p class="dnote">${esc(t('noPackages'))}</p>`
+        : `<b style="display:block;margin-bottom:6px;font-size:13px">${esc(t('packages', p.packages.length))}</b><div class="pkgs">${p.packages.map(([n, v]) => `<span class="pkg">${esc(n)} <small>${esc(v)}</small></span>`).join('')}</div>`)
+      + `</section>`;
+  }
+  body.innerHTML = html;
 }
 
-$('tFit').onclick = fit;
-$('tWire').onclick = e => {
-  wire = !wire; e.currentTarget.classList.toggle('on', wire);
-  current?.traverse(o => o.isMesh && [].concat(o.material).forEach(m => { if(m) m.wireframe = wire; }));
-};
-$('tGrid').onclick = e => { grid.visible = !grid.visible; e.currentTarget.classList.toggle('on', grid.visible); };
-$('tSpin').onclick = e => { controls.autoRotate = !controls.autoRotate; e.currentTarget.classList.toggle('on', controls.autoRotate); };
-
-/* ---------- start ---------- */
+/* =====================================================================
+   start
+   ===================================================================== */
 $('f').addEventListener('submit', e => { e.preventDefault(); loadRepo($('url').value); });
-const q = new URLSearchParams(location.search).get('repo');
-let last = null; try{ last = localStorage.getItem('lastRepo'); }catch(e){}
-if(q){ $('url').value = q; loadRepo(q); } else if(last){ $('url').value = last; }
+setMsg(['welcomeT'], ['welcomeX']);
+applyLang();
+const q0 = new URLSearchParams(location.search).get('repo');
+const last = store.get('lastRepo', null);
+if(q0){ $('url').value = q0; loadRepo(q0); } else if(last){ $('url').value = last; }
 }
 </script>
 </body>
