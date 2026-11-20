@@ -38,6 +38,25 @@ main>aside{order:-1}
 .tools .btn.on{border-color:var(--accent);color:var(--accent)}
 #info{position:absolute;bottom:10px;inset-inline-start:10px;inset-inline-end:10px;background:#22252bd9;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--dim);display:none}
 #info b{color:var(--ink)}
+/* hierarchy (scenes / prefabs) */
+#hier{position:absolute;top:58px;inset-inline-end:10px;width:min(300px,calc(100% - 20px));max-height:calc(100% - 120px);display:flex;flex-direction:column;background:#22252bf0;border:1px solid var(--line);border-radius:10px;overflow:hidden;z-index:2}
+#hier[hidden]{display:none}
+.hhead{padding:8px 12px;font-weight:700;font-size:13px;border-bottom:1px solid var(--line)}
+.hhead small{display:block;font-weight:400;color:var(--dim);font-size:11px}
+#htree{overflow:auto;padding:4px 0;font-size:13px;direction:ltr;text-align:left}
+#htree details{padding-left:12px}
+#htree>details,#htree>.hl{padding-left:4px}
+#htree .hl{padding-left:24px}
+#htree summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:2px}
+#htree summary::before{content:"▸";color:var(--dim);width:12px;flex:none;font-size:11px}
+#htree details[open]>summary::before{content:"▾"}
+#htree summary::-webkit-details-marker{display:none}
+.hn{display:block;flex:1;border:0;background:none;padding:3px 6px;border-radius:5px;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:28px}
+.hn:hover{background:var(--panel2)}
+.hn small{color:var(--dim);font-size:11px;margin-left:6px}
+.hn.pf bdi{color:#7fb8ff}.hn.md bdi{color:#9fd4ff}.hn.miss bdi{color:var(--bad)}.hn.off{opacity:.5}
+.hn.sel{background:#4c9bff33;outline:1px solid var(--accent)}
+.hn:focus-visible{outline:2px solid var(--accent)}
 /* list side */
 aside{display:flex;flex-direction:column;background:var(--panel);border-inline-end:1px solid var(--line);min-height:0}
 #repoTitle{padding:12px 14px 4px;font-weight:700;direction:ltr;text-align:right;overflow-wrap:anywhere}
@@ -65,6 +84,7 @@ aside{display:flex;flex-direction:column;background:var(--panel);border-inline-e
 .cscene{background:#ffb84c26;color:#ffc874}.caudio{background:#ff7aa826;color:#ff9dbf}.cother{background:#ffffff14;color:#b8bec9}
 @media(max-width:820px){
   main{grid-template-columns:1fr;grid-template-rows:48vh auto}
+  #hier{top:100px;max-height:calc(100% - 150px)}
   main>aside{order:0;border-inline-end:0;border-top:1px solid var(--line)}
   #list{max-height:none;overflow:visible}
   body{overflow-y:auto}
@@ -74,7 +94,8 @@ aside{display:flex;flex-direction:column;background:var(--panel);border-inline-e
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "js-yaml":"https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.mjs"
 }}
 </script>
 </head>
@@ -97,6 +118,11 @@ aside{display:flex;flex-direction:column;background:var(--panel);border-inline-e
       <button class="btn" id="tWire" type="button">هيكل سلكي</button>
       <button class="btn on" id="tGrid" type="button">الأرضية</button>
       <button class="btn" id="tSpin" type="button">لف تلقائي</button>
+      <button class="btn" id="tHier" type="button" hidden>الهيكل</button>
+    </div>
+    <div id="hier" hidden>
+      <div class="hhead">Hierarchy <small>اضغط على أي عنصر حتى تروح له</small></div>
+      <div id="htree"></div>
     </div>
     <div id="info"></div>
   </section>
@@ -121,6 +147,8 @@ import {PLYLoader} from 'three/addons/loaders/PLYLoader.js';
 import {ColladaLoader} from 'three/addons/loaders/ColladaLoader.js';
 import {TDSLoader} from 'three/addons/loaders/TDSLoader.js';
 import {TGALoader} from 'three/addons/loaders/TGALoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import {load as yamlLoad} from 'js-yaml';
 
 {
 const $ = id => document.getElementById(id);
@@ -167,7 +195,7 @@ async function api(path){
 async function loadRepo(input){
   const p = parseRepo(input);
   if(!p){ setMsg('الرابط مو صحيح','اكتبه هيج: https://github.com/owner/repo'); return; }
-  repo = p; files = []; byName.clear(); selPath = null; limit = 400;
+  repo = p; files = []; byName.clear(); guidIndex = null; guidIndexP = null; selPath = null; limit = 400;
   $('repoTitle').textContent = `${p.owner}/${p.name}`;
   $('note').textContent = '';
   $('list').innerHTML = '<div class="empty">جاري جلب الملفات…</div>';
@@ -175,6 +203,7 @@ async function loadRepo(input){
   try{
     if(!repo.branch) repo.branch = (await api(`/repos/${p.owner}/${p.name}`)).default_branch;
     const t = await api(`/repos/${p.owner}/${p.name}/git/trees/${encodeURIComponent(repo.branch)}?recursive=1`);
+    repo.treeSha = t.sha;
     files = t.tree.filter(x => x.type === 'blob').map(x => {
       const name = x.path.split('/').pop();
       const dot = name.lastIndexOf('.');
@@ -278,6 +307,8 @@ function clearModel(){
     });
   }
   current = null; mixer = null; $('info').style.display = 'none';
+  if(selHelper){ scene.remove(selHelper); selHelper = null; }
+  $('hier').hidden = true; $('tHier').hidden = true; $('htree').innerHTML = '';
 }
 
 async function getBuffer(path){
@@ -338,60 +369,616 @@ async function openFile(f){
     }catch(e){ setMsg('صار خطأ', e.message, ghUrl(f.path)); }
     return;
   }
-  if(!VIEW3D.includes(f.ext)){
+  if(!VIEW3D.includes(f.ext) && f.ext !== 'unity' && f.ext !== 'prefab'){
     clearModel(); $('tools').hidden = true;
     const why = ['blend','max','ma','mb'].includes(f.ext) ? 'ملفات ' + f.ext + ' تحتاج برنامجها الأصلي، ما تنعرض بالمتصفح.' : 'هذا الملف مو 3D، تكدر تشوفه بـGitHub.';
     setMsg(f.name, why, ghUrl(f.path));
     return;
   }
   clearModel();
-  setMsg('جاري تحميل الموديل…', f.name + ' · ' + fmt(f.size));
-  const base = rawUrl(f.dir ? f.dir + '/' : '').replace(/[^/]*$/, '');
-  const mgr = makeManager();
-  const mat = () => new THREE.MeshStandardMaterial({color:0xc9ced6, roughness:.6, metalness:.1});
+  const isUnity = f.ext === 'unity' || f.ext === 'prefab';
+  setMsg(isUnity ? 'جاري قراءة الملف…' : 'جاري تحميل الموديل…', f.name + ' · ' + fmt(f.size));
   try{
-    let obj, anims = [];
-    {
-      const buf = await getBuffer(f.path);
-      if(token !== loadToken) return;
-      const text = () => new TextDecoder().decode(buf);
-      switch(f.ext){
-        case 'gltf': case 'glb': { const g = await parseP(new GLTFLoader(mgr), buf, base); obj = g.scene; anims = g.animations; break; }
-        case 'fbx': obj = new FBXLoader(mgr).parse(buf, base); anims = obj.animations || []; break;
-        case 'obj': obj = new OBJLoader(mgr).parse(text()); break;
-        case 'dae': obj = new ColladaLoader(mgr).parse(text(), base).scene; break;
-        case '3ds': obj = new TDSLoader(mgr).parse(buf, base); break;
-        case 'stl': { const g = new STLLoader().parse(buf); g.computeVertexNormals(); obj = new THREE.Mesh(g, mat()); break; }
-        case 'ply': { const g = new PLYLoader().parse(buf); g.computeVertexNormals();
-          const m = mat(); if(g.attributes.color){ m.vertexColors = true; m.color.set(0xffffff); }
-          obj = new THREE.Mesh(g, m); break; }
-      }
-    }
+    const {obj, anims, extra} = isUnity ? await buildUnityFile(f, token) : await loadModelObject(f);
     if(token !== loadToken) return;
     current = obj; scene.add(obj);
-    let verts = 0, tris = 0, meshes = 0;
-    obj.traverse(o => {
-      if(!o.isMesh) return; meshes++;
-      const g = o.geometry, n = g.attributes.position?.count || 0;
-      verts += n; tris += (g.index ? g.index.count : n) / 3;
-      [].concat(o.material).forEach(m => {
-        if(!m) return;
-        m.wireframe = wire;
-        // drop placeholder textures with no image (e.g. missing .dds) — they render black
-        for(const k in m){ const t = m[k]; if(t && t.isTexture && !t.image && !t.isDataTexture){ m[k] = null; m.needsUpdate = true; } }
-      });
-    });
+    const s = prepAndCount(obj);
     if(anims.length){ mixer = new THREE.AnimationMixer(obj); mixer.clipAction(anims[0]).play(); }
     fit();
     $('msg').style.display = 'none'; $('tools').hidden = false;
     $('info').style.display = 'block';
-    $('info').innerHTML = `<b>${esc(f.name)}</b> · ${meshes} ميش · ${Math.round(verts).toLocaleString('en')} نقطة · ${Math.round(tris).toLocaleString('en')} مثلث`
+    $('info').innerHTML = `<b>${esc(f.name)}</b>` + (extra || '') + ` · ${s.meshes} ميش · ${Math.round(s.verts).toLocaleString('en')} نقطة · ${Math.round(s.tris).toLocaleString('en')} مثلث`
       + (anims.length ? ` · ${anims.length} أنيميشن (يشتغل الأول)` : '');
+    if(isUnity) showHierarchy(obj);
   }catch(e){
     if(token !== loadToken) return;
     console.warn(e); clearModel(); $('tools').hidden = true;
-    setMsg('ما كدرت أعرض الموديل', e.message || String(e), ghUrl(f.path));
+    setMsg(isUnity ? 'ما كدرت أعرض الملف' : 'ما كدرت أعرض الموديل', e.message || String(e), ghUrl(f.path));
   }
+}
+
+/* loads any supported 3D file into a three.js object (no scene changes) */
+async function loadModelObject(f){
+  const base = rawUrl(f.dir ? f.dir + '/' : '').replace(/[^/]*$/, '');
+  const mgr = makeManager();
+  const mat = () => new THREE.MeshStandardMaterial({color:0xc9ced6, roughness:.6, metalness:.1});
+  const buf = await getBuffer(f.path);
+  const text = () => new TextDecoder().decode(buf);
+  let obj, anims = [];
+  switch(f.ext){
+    case 'gltf': case 'glb': { const g = await parseP(new GLTFLoader(mgr), buf, base); obj = g.scene; anims = g.animations; break; }
+    case 'fbx': obj = new FBXLoader(mgr).parse(buf, base); anims = obj.animations || []; break;
+    case 'obj': obj = new OBJLoader(mgr).parse(text()); break;
+    case 'dae': obj = new ColladaLoader(mgr).parse(text(), base).scene; break;
+    case '3ds': obj = new TDSLoader(mgr).parse(buf, base); break;
+    case 'stl': { const g = new STLLoader().parse(buf); g.computeVertexNormals(); obj = new THREE.Mesh(g, mat()); break; }
+    case 'ply': { const g = new PLYLoader().parse(buf); g.computeVertexNormals();
+      const m = mat(); if(g.attributes.color){ m.vertexColors = true; m.color.set(0xffffff); }
+      obj = new THREE.Mesh(g, m); break; }
+    default: throw new Error('نوع غير مدعوم: ' + f.ext);
+  }
+  return {obj, anims};
+}
+
+function prepAndCount(obj){
+  let verts = 0, tris = 0, meshes = 0;
+  obj.traverse(o => {
+    if(!o.isMesh || o.userData.placeholder) return; meshes++;
+    const g = o.geometry, n = g.attributes.position?.count || 0;
+    verts += n; tris += (g.index ? g.index.count : n) / 3;
+    [].concat(o.material).forEach(m => {
+      if(!m) return;
+      m.wireframe = wire;
+      // drop placeholder textures with no image (e.g. missing .dds) — they render black
+      for(const k in m){ const t = m[k]; if(t && t.isTexture && !t.image && !t.isDataTexture){ m[k] = null; m.needsUpdate = true; } }
+    });
+  });
+  return {verts, tris, meshes};
+}
+
+/* =====================================================================
+   Unity .unity / .prefab  (text-serialized YAML)
+   ===================================================================== */
+const BUILTIN_EXTRA = '0000000000000000e000000000000000';   // Library/unity default resources (primitives)
+const UNITY_PARSE = new Set([4, 224, 33, 23, 137, 1001, 21]); // classes we fully parse
+const td = new TextDecoder();
+const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+
+/* split a Unity YAML file into documents; heavy/unneeded classes are only regex-scanned */
+function parseUnityYaml(text){
+  if(!/^%YAML/.test(text)) throw new Error('هذا الملف محفوظ بصيغة Binary. بـUnity لازم Asset Serialization = Force Text حتى ينقرا.');
+  const heads = [], re = /^--- !u!(\d+) &(-?\d+)( stripped)?[^\n]*\n/gm;
+  let m;
+  while((m = re.exec(text))) heads.push({cls:+m[1], id:m[2], stripped:!!m[3], start:re.lastIndex, at:m.index});
+  const docs = new Map();
+  heads.forEach((h, i) => {
+    const body = text.slice(h.start, i + 1 < heads.length ? heads[i+1].at : text.length);
+    const type = (body.match(/^(\w+):/) || [])[1] || '';
+    const doc = {cls:h.cls, id:h.id, stripped:h.stripped, type, d:{}};
+    doc.go = (body.match(/m_GameObject: \{fileID: (-?\d+)/) || [])[1];
+    if(h.cls === 1){
+      const nm = (body.match(/^  m_Name: ?(.*)$/m) || [])[1] || '';
+      doc.d.m_Name = nm.replace(/^(['"])(.*)\1$/, '$2').trim();
+      doc.d.m_IsActive = +((body.match(/m_IsActive: (\d)/) || [])[1] ?? 1);
+      doc.d.m_PrefabInstance = (body.match(/m_PrefabInstance: \{fileID: (-?\d+)/) || [])[1];
+      doc.d.src = (body.match(/m_CorrespondingSourceObject: \{fileID: (-?\d+)/) || [])[1];
+    }else if(UNITY_PARSE.has(h.cls) || h.stripped){
+      try{
+        const o = yamlLoad(body.replace(/(fileID|guid): (-?[0-9a-fA-F]+)/g, '$1: "$2"'));
+        doc.d = (o && o[type]) || {};
+      }catch(e){ return; }
+    }else{
+      doc.script = (body.match(/m_Script: \{fileID: -?\d+, guid: ([0-9a-f]{32})/) || [])[1];
+      doc.enabled = +((body.match(/^  m_Enabled: (\d)/m) || [])[1] ?? 1);
+    }
+    docs.set(h.id, doc);
+  });
+  return docs;
+}
+
+/* ---- GUID index from .meta files (fetched from raw.githubusercontent, no API quota) ---- */
+/* phase A (needed to draw): models, prefabs, materials, textures. phase B (labels only): scripts, in background.
+   The finished index is kept in localStorage per repo tree SHA, so it is built once. */
+let guidIndex = null, guidIndexP = null, scriptsReady = false;
+const IDX_A = [...VIEW3D, 'prefab', 'mat', ...WEBTEX, 'psd', 'tif', 'tiff'];
+const idxKey = () => `gidx:${repo.owner}/${repo.name}@${repo.treeSha}`;
+function metaTodo(exts){
+  return files.filter(f => f.cat === 'meta').map(f => {
+    const asset = f.path.slice(0, -5), ext = (asset.split('/').pop().match(/\.([^.]+)$/) || [])[1]?.toLowerCase() || '';
+    return {meta:f.path, asset, ext};
+  }).filter(x => exts.includes(x.ext)).slice(0, 4000);
+}
+async function indexMetas(todo, map, onProgress){
+  let done = 0;
+  await pool(todo, 48, async x => {
+    const r = await fetch(rawUrl(x.meta));
+    if(r.ok){
+      const t = await r.text(), g = (t.match(/^guid: ([0-9a-f]{32})/m) || [])[1];
+      if(g) map.set(g, {path:x.asset, ext:x.ext});
+    }
+    onProgress?.(++done, todo.length);
+  });
+}
+function buildGuidIndex(onProgress, onScripts){
+  if(guidIndex) return Promise.resolve(guidIndex);
+  if(guidIndexP) return guidIndexP;
+  try{
+    const c = JSON.parse(localStorage.getItem(idxKey()) || 'null');
+    if(c){ guidIndex = new Map(c.map(([g, p]) => [g, {path:p, ext:(p.match(/\.([^.]+)$/) || [])[1]?.toLowerCase() || ''}])); scriptsReady = true; return Promise.resolve(guidIndex); }
+  }catch(e){}
+  const map = new Map();
+  guidIndexP = indexMetas(metaTodo(IDX_A), map, onProgress).then(() => {
+    guidIndex = map;
+    indexMetas(metaTodo(['cs']), map).then(() => {
+      scriptsReady = true;
+      try{
+        for(let i = localStorage.length - 1; i >= 0; i--){ const k = localStorage.key(i); if(k?.startsWith('gidx:') && k !== idxKey()) localStorage.removeItem(k); }
+        localStorage.setItem(idxKey(), JSON.stringify([...map].map(([g, v]) => [g, v.path])));
+      }catch(e){}
+      onScripts?.();
+    });
+    return map;
+  });
+  return guidIndexP;
+}
+async function pool(items, n, fn){
+  let i = 0;
+  await Promise.all(Array.from({length:Math.min(n, items.length)}, async () => {
+    while(i < items.length){ const k = i++; try{ await fn(items[k]); }catch(e){} }
+  }));
+}
+
+/* model .meta → fileID tables, import scale, material remaps */
+function parseModelMeta(t){
+  const table = new Map();                 // fileID → {cls, name}
+  const sec = t.match(/fileIDToRecycleName:\n((?: {4}.*\n)+)/);
+  if(sec) for(const l of sec[1].split('\n')){
+    const m = l.match(/^ {4}(-?\d+): (.*)$/); if(m) table.set(m[1], {cls:Math.floor(Math.abs(+m[1]) / 100000), name:m[2].trim()});
+  }
+  for(const m of t.matchAll(/- first:\s*\n\s*(\d+): (-?\d+)\s*\n\s*second: (.*)/g)) table.set(m[2], {cls:+m[1], name:m[3].trim()});
+  const ext = new Map();
+  for(const m of t.matchAll(/type: UnityEngine:Material\s*\n\s*assembly: .*\n\s*name: (.*)\n\s*second: \{fileID: -?\d+, guid: ([0-9a-f]{32})/g)) ext.set(m[1].trim(), m[2]);
+  return {
+    table, extMats: ext,
+    globalScale: num((t.match(/globalScale: ([\d.eE+-]+)/) || [])[1], 1),
+    useFileScale: +((t.match(/useFileScale: (\d)/) || [])[1] ?? 1),
+    preserveHierarchy: +((t.match(/preserveHierarchy: (\d)/) || [])[1] ?? 0),
+  };
+}
+
+/* Unity (left-handed) → three.js (right-handed): mirror Z */
+function applyU(n){
+  const u = n.userData.u;
+  n.position.set(u.p.x, u.p.y, -u.p.z);
+  n.quaternion.set(-u.q.x, -u.q.y, u.q.z, u.q.w);
+  if(n.quaternion.lengthSq() < 1e-8) n.quaternion.identity(); else n.quaternion.normalize();
+  n.scale.set(u.s.x, u.s.y, u.s.z);
+}
+const vec = (o, d = 0) => ({x:num(o?.x, d), y:num(o?.y, d), z:num(o?.z, d)});
+const quat = o => ({x:num(o?.x, 0), y:num(o?.y, 0), z:num(o?.z, 0), w:num(o?.w, 1)});
+function setMod(n, path, value){
+  const m = path.match(/^m_Local(Position|Rotation|Scale)\.([xyzw])$/);
+  if(m && n.userData.u){ n.userData.u[{Position:'p', Rotation:'q', Scale:'s'}[m[1]]][m[2]] = num(value, 0); applyU(n); return true; }
+  return false;
+}
+
+/* built-in primitive meshes (already in three space; all symmetric) */
+function primitive(fileID){
+  switch(+fileID){
+    case 10202: return new THREE.BoxGeometry(1, 1, 1);
+    case 10207: return new THREE.SphereGeometry(.5, 32, 16);
+    case 10206: return new THREE.CylinderGeometry(.5, .5, 2, 32);
+    case 10208: return new THREE.CapsuleGeometry(.5, 1, 8, 24);
+    case 10209: return new THREE.PlaneGeometry(10, 10).rotateX(-Math.PI / 2);
+    case 10210: return new THREE.PlaneGeometry(1, 1);
+  }
+  return null;
+}
+const defaultMat = () => new THREE.MeshStandardMaterial({color:0xcfd3da, roughness:.6, metalness:0});
+const placeholderMat = new THREE.MeshBasicMaterial({color:0x8892a0, wireframe:true, transparent:true, opacity:.45});
+
+async function buildUnityFile(f, token){
+  const text = td.decode(await getBuffer(f.path));
+  const docs = parseUnityYaml(text);
+  const needIndex = /guid: (?!0{16})[0-9a-f]{32}/.test(text);
+  if(needIndex && files.some(x => x.cat === 'meta')){
+    await buildGuidIndex(
+      (d, n) => { if(token === loadToken && d % 20 === 0) setMsg('جاري فهرسة ملفات ‎.meta… (أول مرة بس)', `${d} / ${n}`); },
+      () => { if(current && !$('tHier').hidden) showHierarchy(current, true); });
+  }
+  if(token !== loadToken) return {obj:new THREE.Group(), anims:[]};
+  setMsg('جاري بناء المشهد…', f.name);
+  const ctx = {models:new Map(), mats:new Map(), texs:new Map(), docCache:new Map([[f.path, docs]]),
+               stats:{gos:0, inst:0, missing:0, missingPrefabs:0}};
+  const root = new THREE.Group();
+  root.name = f.name; root.userData.h = {name:f.name, comps:[], isRoot:true};
+  const res = await buildDocs(docs, ctx, 0, [f.path]);
+  res.roots.forEach(r => root.add(r));
+  const st = ctx.stats;
+  const extra = ` · ${st.gos} GameObject` + (st.inst ? ` · ${st.inst} Prefab` : '')
+    + (st.missing ? ` · <span style="color:var(--accent2)">${st.missing} ميش ما انلكى</span>` : '')
+    + (st.missingPrefabs ? ` · <span style="color:var(--accent2)">${st.missingPrefabs} Prefab ما انلكى</span>` : '');
+  return {obj:root, anims:[], extra};
+}
+
+const guidPath = g => guidIndex?.get(g);
+
+/* builds the GameObject tree of one YAML file. returns roots + fileID→object map */
+async function buildDocs(docs, ctx, depth, stack){
+  const byId = new Map(), gos = new Map(), tnodes = new Map(), jobs = [], roots = [];
+  for(const doc of docs.values()){
+    if(doc.cls === 1 && !doc.stripped){
+      gos.set(doc.id, {name:doc.d.m_Name || 'GameObject', active:doc.d.m_IsActive !== 0, comps:[], id:doc.id});
+      ctx.stats.gos++;
+    }
+  }
+  for(const doc of docs.values()){
+    if(doc.stripped || doc.cls === 1) continue;
+    const g = doc.go || doc.d?.m_GameObject?.fileID;
+    if(g && gos.has(g)) gos.get(g).comps.push(doc);
+  }
+  // transforms
+  for(const doc of docs.values()){
+    if(doc.stripped || !(doc.cls === 4 || doc.cls === 224)) continue;
+    const d = doc.d, n = new THREE.Group();
+    n.userData.u = {p:vec(d.m_LocalPosition, 0), q:quat(d.m_LocalRotation), s:vec(d.m_LocalScale, 1)};
+    applyU(n);
+    const g = gos.get(d.m_GameObject?.fileID);
+    if(g){
+      n.name = g.name; n.visible = g.active; g.node = n; byId.set(g.id, n);
+      n.userData.h = {name:g.name, active:g.active, comps:g.comps};
+    }
+    byId.set(doc.id, n);
+    tnodes.set(doc.id, {n, father:d.m_Father?.fileID || '0', kids:(d.m_Children || []).map(c => c.fileID)});
+  }
+  // meshes
+  for(const g of gos.values()){
+    if(!g.node) continue;
+    const mf = g.comps.find(c => c.cls === 33), smr = g.comps.find(c => c.cls === 137), mr = g.comps.find(c => c.cls === 23);
+    const ref = mf?.d.m_Mesh || smr?.d.m_Mesh, rend = smr || mr;
+    if(ref && ref.fileID !== '0') jobs.push(meshFor(ref, rend, g, ctx).then(m => { if(m && rend) byId.set(rend.id, m); }));
+  }
+  // prefab instances
+  const insts = new Map();
+  for(const doc of docs.values()){
+    if(doc.cls !== 1001 || doc.stripped || doc.type !== 'PrefabInstance') continue;
+    jobs.push(buildInstance(doc.d, ctx, depth, stack).then(r => insts.set(doc.id, r)));
+  }
+  await Promise.all(jobs);
+  // stripped objects → their real node inside the instantiated prefab
+  for(const doc of docs.values()){
+    if(!doc.stripped) continue;
+    const inst = insts.get(doc.d.m_PrefabInstance?.fileID || doc.d.m_PrefabInstance);
+    const src = doc.d.m_CorrespondingSourceObject?.fileID || doc.d.src;
+    const target = inst?.map.get(src);
+    if(target) byId.set(doc.id, target);
+  }
+  // parent transforms (respect m_Children order)
+  const placed = new Set();
+  const attach = id => {
+    const t = tnodes.get(id); if(!t || placed.has(id)) return; placed.add(id);
+    const p = t.father !== '0' ? byId.get(t.father) : null;
+    if(p) p.add(t.n); else roots.push(t.n);
+    t.kids.forEach(attach);
+  };
+  for(const [id, t] of tnodes) if(t.father === '0' || !tnodes.has(t.father)) attach(id);
+  for(const id of tnodes.keys()) attach(id);
+  // prefab instances → their parent
+  for(const [id, r] of insts){
+    const p = r.parent !== '0' ? byId.get(r.parent) : null;
+    if(p) p.add(r.root); else roots.push(r.root);
+  }
+  // modifications that point at objects of this file from an outer instance use byId
+  for(const [, r] of insts) for(const [k, v] of r.map) if(!byId.has(k)) byId.set(k, v);
+  return {roots, byId};
+}
+
+function compName(c){
+  if(typeof c === 'string') return c;
+  if(c.cls === 114 && c.script){ const p = guidPath(c.script); if(p) return p.path.split('/').pop().replace(/\.cs$/, ''); return scriptsReady ? 'Script' : 'Script…'; }
+  return c.type || ('#' + c.cls);
+}
+
+async function meshFor(ref, rend, g, ctx){
+  const mats = rend ? await Promise.all((rend.d.m_Materials || []).map(m => matFor(m, ctx))) : [];
+  const finish = (geo, wrap) => {
+    const ms = mats.filter(Boolean);
+    const material = !ms.length ? defaultMat() : (geo.groups.length > 1 ? geo.groups.map((_, i) => ms[Math.min(i, ms.length - 1)]) : ms[0]);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.userData.skip = true;
+    if(rend && rend.d.m_Enabled === 0) mesh.visible = false;
+    if(wrap){ const w = new THREE.Group(); w.userData.skip = true; w.rotation.y = Math.PI; w.scale.setScalar(wrap); w.add(mesh); g.node.add(w); }
+    else g.node.add(mesh);
+    return mesh;
+  };
+  if(ref.guid === BUILTIN_EXTRA){
+    const geo = primitive(ref.fileID);
+    if(geo) return finish(geo, 0);
+  }else if(ref.guid){
+    const info = guidPath(ref.guid);
+    if(info && VIEW3D.includes(info.ext)){
+      const md = await modelFor(info, ctx);
+      if(md){
+        const want = md.meta.table.get(ref.fileID)?.name;
+        const meshes = []; md.obj.traverse(o => o.isMesh && meshes.push(o));
+        const hit = (want && meshes.find(o => o.name === want)) || (meshes.length === 1 && meshes[0]) || meshes.find(o => o.name === g.name);
+        if(hit) return finish(hit.geometry, md.us);
+      }
+    }
+  }
+  // unresolved: show a faint wire cube where it sits
+  ctx.stats.missing++;
+  const ph = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), placeholderMat);
+  ph.userData.skip = ph.userData.placeholder = true;
+  g.node.add(ph);
+  return null;
+}
+
+function modelFor(info, ctx){
+  if(!ctx.models.has(info.path)) ctx.models.set(info.path, (async () => {
+    const f = fileByPath.get(info.path); if(!f) return null;
+    try{
+      const [{obj}, metaText] = await Promise.all([
+        loadModelObject(f),
+        fetch(rawUrl(info.path + '.meta')).then(r => r.ok ? r.text() : '').catch(() => '')]);
+      const meta = parseModelMeta(metaText);
+      const usf = obj.userData.unitScaleFactor ?? 1;
+      const us = meta.globalScale * (f.ext === 'fbx' && meta.useFileScale ? usf / 100 : 1);
+      return {obj, meta, us, f};
+    }catch(e){ console.warn('model', info.path, e); return null; }
+  })());
+  return ctx.models.get(info.path);
+}
+
+/* ---- materials (.mat) ---- */
+function matFor(ref, ctx){
+  if(!ref || ref.fileID === '0' || !ref.guid) return Promise.resolve(null);
+  if(/^0{16}/.test(ref.guid)) return Promise.resolve(defaultMat());
+  const info = guidPath(ref.guid);
+  if(!info || info.ext !== 'mat') return Promise.resolve(null);
+  if(!ctx.mats.has(info.path)) ctx.mats.set(info.path, loadMat(info.path, ctx).catch(e => { console.warn('mat', e); return null; }));
+  return ctx.mats.get(info.path);
+}
+const toDict = list => {
+  const o = {};
+  (list || []).forEach(it => {
+    if(it && it.first) o[it.first.name] = it.second;            // Unity 5.x format
+    else if(it) Object.assign(o, it);
+  });
+  return o;
+};
+async function loadMat(path, ctx){
+  const docs = parseUnityYaml(td.decode(await getBuffer(path)));
+  const d = [...docs.values()].find(x => x.cls === 21)?.d; if(!d) return null;
+  const sp = d.m_SavedProperties || {};
+  const colors = toDict(sp.m_Colors), texs = toDict(sp.m_TexEnvs), floats = toDict(sp.m_Floats);
+  const c = colors._BaseColor || colors._Color || colors._TintColor || colors._MainColor;
+  const m = new THREE.MeshStandardMaterial({color:0xffffff, metalness:0});
+  m.name = String(d.m_Name || '');
+  if(c) m.color.setRGB(num(c.r, 1), num(c.g, 1), num(c.b, 1), THREE.SRGBColorSpace);
+  const sm = floats._Smoothness ?? floats._Glossiness;
+  m.roughness = sm !== undefined ? Math.min(1, Math.max(.15, 1 - num(sm, .5))) : .6;
+  const a = c ? num(c.a, 1) : 1;
+  if(a < .99 && (num(floats._Mode, 0) >= 2 || num(floats._Surface, 0) >= 1)){ m.transparent = true; m.opacity = a; m.depthWrite = false; }
+  const kw = String(d.m_ShaderKeywords || '') + ' ' + JSON.stringify(d.m_ValidKeywords || []);
+  const ec = colors._EmissionColor;
+  if(ec && /_EMISSION/.test(kw)) m.emissive.setRGB(Math.min(1, num(ec.r, 0)), Math.min(1, num(ec.g, 0)), Math.min(1, num(ec.b, 0)), THREE.SRGBColorSpace);
+  const t = texs._BaseMap || texs._MainTex || texs._BaseColorMap || texs._Albedo;
+  const tg = t?.m_Texture?.guid;
+  if(tg && tg !== '0'){
+    const tex = await texFor(tg, ctx);
+    if(tex){
+      const tt = tex.clone(); tt.needsUpdate = true;
+      tt.wrapS = tt.wrapT = THREE.RepeatWrapping;
+      if(t.m_Scale) tt.repeat.set(num(t.m_Scale.x, 1), num(t.m_Scale.y, 1));
+      if(t.m_Offset) tt.offset.set(num(t.m_Offset.x, 0), num(t.m_Offset.y, 0));
+      m.map = tt;
+    }
+  }
+  return m;
+}
+function texFor(guid, ctx){
+  if(ctx.texs.has(guid)) return ctx.texs.get(guid);
+  const p = (async () => {
+    const info = guidPath(guid); if(!info) return null;
+    let f = fileByPath.get(info.path); if(!f) return null;
+    if(!WEBTEX.includes(f.ext)){                       // psd/tif → same-name web image if any
+      const stem = f.name.replace(/\.[^.]+$/, '').toLowerCase();
+      const alt = WEBTEX.map(e => byName.get(stem + '.' + e)).find(Boolean);
+      if(!alt) return null; f = fileByPath.get(alt);
+    }
+    const url = f.size < 300 ? mediaUrl(f.path) : rawUrl(f.path);
+    const tex = await (f.ext === 'tga' ? new TGALoader() : new THREE.TextureLoader()).loadAsync(url);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  })().catch(() => null);
+  ctx.texs.set(guid, p);
+  return p;
+}
+
+/* ---- PrefabInstance: nested .prefab or a model file ---- */
+async function buildInstance(d, ctx, depth, stack){
+  ctx.stats.inst++;
+  const mod = d.m_Modification || {}, mods = mod.m_Modifications || [];
+  const parent = mod.m_TransformParent?.fileID || '0';
+  const guid = d.m_SourcePrefab?.guid, info = guid && guidPath(guid);
+  let root = null, map = new Map();
+  if(info && info.ext === 'prefab' && depth < 6 && !stack.includes(info.path)){
+    try{
+      if(!ctx.docCache.has(info.path)) ctx.docCache.set(info.path, getBuffer(info.path).then(b => parseUnityYaml(td.decode(b))));
+      const docs = await ctx.docCache.get(info.path);
+      const r = await buildDocs(docs, ctx, depth + 1, [...stack, info.path]);
+      root = r.roots.length === 1 ? r.roots[0] : new THREE.Group();
+      if(r.roots.length !== 1){
+        r.roots.forEach(x => root.add(x)); root.userData.u = {p:vec(), q:quat(), s:vec(null, 1)};
+        root.userData.h = {name:info.path.split('/').pop().replace(/\.prefab$/, ''), comps:[]};
+      }
+      map = r.byId;
+    }catch(e){ console.warn('prefab', info.path, e); }
+  }else if(info && VIEW3D.includes(info.ext)){
+    const md = await modelFor(info, ctx);
+    if(md) ({root, map} = instantiateModel(md, mods, ctx));
+  }
+  const nameMod = mods.find(m => m.propertyPath === 'm_Name');
+  if(!root){
+    ctx.stats.missingPrefabs++;
+    root = new THREE.Group(); root.userData.u = {p:vec(), q:quat(), s:vec(null, 1)};
+    root.userData.h = {name:(nameMod ? String(nameMod.value) : (info?.path.split('/').pop() || 'Missing Prefab')), comps:[], missing:true};
+    const ph = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), placeholderMat); ph.userData.skip = ph.userData.placeholder = true; root.add(ph);
+    // still honour the root position mods
+    const byT = new Map(); mods.forEach(m => { if(/^m_Local/.test(m.propertyPath)) byT.set(m.target?.fileID, (byT.get(m.target?.fileID) || 0) + 1); });
+    const rootT = [...byT].sort((a, b) => b[1] - a[1])[0]?.[0];
+    if(rootT) map.set(rootT, root);
+  }
+  if(root.userData.h) root.userData.h.prefab = true;
+  // apply modifications
+  for(const m of mods){
+    const n = map.get(m.target?.fileID); if(!n) continue;
+    const p = m.propertyPath;
+    if(setMod(n, p, m.value)) continue;
+    if(p === 'm_Name'){ n.name = String(m.value); if(n.userData.h) n.userData.h.name = String(m.value); }
+    else if(p === 'm_IsActive'){ n.visible = String(m.value) !== '0'; if(n.userData.h) n.userData.h.active = n.visible; }
+    else if(p === 'm_Enabled' && n.isMesh){ n.visible = String(m.value) !== '0'; }
+    else if(/^m_Materials\.Array\.data\[(\d+)\]$/.test(p) && n.isMesh && m.objectReference?.guid){
+      const i = +p.match(/\d+/)[0];
+      matFor(m.objectReference, ctx).then(mt => {
+        if(!mt) return;
+        if(Array.isArray(n.material)){ n.material[i] = mt; } else if(i === 0) n.material = mt;
+        mt.wireframe = wire;
+      });
+    }
+  }
+  return {root, map, parent};
+}
+
+/* model file used as a prefab (dragged FBX in the scene) */
+function instantiateModel(md, mods, ctx){
+  const src = SkeletonUtils.clone(md.obj);
+  const map = new Map();
+  // Unity collapses a single top-level node into the model root (unless preserveHierarchy)
+  const tops = src.children.filter(c => !c.isLight && !c.isCamera);
+  const collapse = !md.meta.preserveHierarchy && tops.length === 1;
+  const root = new THREE.Group();
+  const content = collapse ? tops[0] : src;
+  const name = md.f.name.replace(/\.[^.]+$/, '');
+  root.name = name;
+  const u = {p:vec(), q:quat(), s:vec(null, 1)};
+  if(collapse){                                  // node TRS (FBX, right-handed) → Unity (mirror X)
+    const c = content;
+    u.p = {x:-c.position.x * md.us, y:c.position.y * md.us, z:c.position.z * md.us};
+    u.q = {x:c.quaternion.x, y:-c.quaternion.y, z:-c.quaternion.z, w:c.quaternion.w};
+    u.s = {x:c.scale.x, y:c.scale.y, z:c.scale.z};
+    c.position.set(0, 0, 0); c.quaternion.identity(); c.scale.set(1, 1, 1);
+  }
+  root.userData.u = u; applyU(root);
+  const wrap = new THREE.Group(); wrap.userData.skip = true;
+  wrap.rotation.y = Math.PI; wrap.scale.setScalar(md.us);
+  if(collapse){ content.children.slice().forEach(ch => wrap.add(ch)); if(content.isMesh){ const mm = new THREE.Mesh(content.geometry, content.material); mm.name = name; wrap.add(mm); } }
+  else wrap.add(src);
+  root.add(wrap);
+  root.userData.h = {name, comps:['Model'], model:true};
+  // FBX materials → project .mat via externalObjects or same-named .mat
+  wrap.traverse(o => {
+    if(!o.isMesh) return;
+    const list = [].concat(o.material);
+    list.forEach((mt, i) => {
+      const g = md.meta.extMats.get(mt?.name) || (() => { const p = byName.get((mt?.name || '').toLowerCase() + '.mat'); if(!p) return null; for(const [k, v] of guidIndex || []) if(v.path === p) return k; return null; })();
+      if(g) matFor({fileID:'2100000', guid:g}, ctx).then(nm => { if(!nm) return; nm.wireframe = wire; if(Array.isArray(o.material)) o.material[i] = nm; else o.material = nm; });
+    });
+  });
+  // fileID → objects (needs the .meta table; otherwise guess the root)
+  const byName2 = new Map(); wrap.traverse(o => { if(o.name && !byName2.has(o.name)) byName2.set(o.name, o); });
+  for(const [id, e] of md.meta.table){
+    if(e.name === '//RootNode' || e.name === name){ if(e.cls === 1 || e.cls === 4) map.set(id, root); if((e.cls === 23 || e.cls === 137) && collapse && content.isMesh) { const mm = wrap.children.find(x => x.isMesh && x.name === name); if(mm) map.set(id, mm); } continue; }
+    const o = byName2.get(e.name); if(!o) continue;
+    if(e.cls === 1 || e.cls === 4) map.set(id, o);   // name/active only: inner nodes stay in FBX space
+    else if((e.cls === 23 || e.cls === 137) && o.isMesh) map.set(id, o);
+  }
+  if(![...map.values()].includes(root)){
+    const byT = new Map();
+    mods.forEach(m => { if(/^m_Local|^m_RootOrder/.test(m.propertyPath)) byT.set(m.target?.fileID, (byT.get(m.target?.fileID) || 0) + 1); });
+    const rootT = [...byT].sort((a, b) => b[1] - a[1])[0]?.[0];
+    if(rootT && !map.has(rootT)) map.set(rootT, root);
+  }
+  return {root, map};
+}
+
+/* ---- Hierarchy panel ---- */
+let selHelper = null;
+function showHierarchy(root, refresh){
+  const open = refresh ? new Set([...$('htree').querySelectorAll('details[open]>summary>.hn')].map(b => b.dataset.u)) : null;
+  const sel = refresh ? $('htree').querySelector('.hn.sel')?.dataset.u : null;
+  const scroll = $('htree').scrollTop;
+  const rows = [];
+  const label = o => o.userData.h?.name ?? o.name ?? '';
+  const walk = (o, depth) => {
+    const flat = [];
+    // skip our wrapper groups but keep their children
+    const gather = list => list.forEach(c => { if(c.userData.skip){ if(!c.isMesh) gather(c.children); } else flat.push(c); });
+    gather(o.children);
+    const h = o.userData.h || {};
+    const cls = ['hn', h.prefab ? 'pf' : '', h.model ? 'md' : '', h.missing ? 'miss' : '', o.visible === false || h.active === false ? 'off' : ''].join(' ');
+    const comps = (h.comps || []).map(compName).filter(c => c !== 'Transform' && c !== 'RectTransform');
+    const tip = comps.length ? ` title="${esc(comps.join(', '))}"` : '';
+    const nm = `<button type="button" class="${cls}" data-u="${o.uuid}"${tip}><bdi>${esc(String(label(o)) || '(بلا اسم)')}</bdi>${comps.length ? `<small>${esc(comps.slice(0, 4).join(' · '))}${comps.length > 4 ? ' …' : ''}</small>` : ''}</button>`;
+    if(!flat.length){ rows.push(`<div class="hl">${nm}</div>`); return; }
+    rows.push(`<details${(open ? open.has(o.uuid) : depth < 1) ? ' open' : ''}><summary>${nm}</summary>`);
+    flat.forEach(c => walk(c, depth + 1));
+    rows.push('</details>');
+  };
+  if(rows.length < 20000) walk(root, 0);
+  $('htree').innerHTML = rows.join('');
+  if(refresh){
+    $('htree').scrollTop = scroll;
+    if(sel) $('htree').querySelector(`[data-u="${sel}"]`)?.classList.add('sel');
+    return;
+  }
+  $('hier').hidden = matchMedia('(max-width:820px)').matches;
+  $('tHier').hidden = false; $('tHier').classList.toggle('on', !$('hier').hidden);
+}
+function selectNode(o){
+  document.querySelectorAll('#htree .hn.sel').forEach(x => x.classList.remove('sel'));
+  if(selHelper){ scene.remove(selHelper); selHelper.geometry?.dispose(); selHelper = null; }
+  if(!o) return;
+  const b = $('htree').querySelector(`[data-u="${o.uuid}"]`);
+  if(b){
+    b.classList.add('sel');
+    for(let p = b.parentElement; p && p.id !== 'htree'; p = p.parentElement) if(p.tagName === 'DETAILS') p.open = true;
+    b.scrollIntoView({block:'nearest'});
+  }
+  const box = new THREE.Box3().setFromObject(o);
+  if(!box.isEmpty()){ selHelper = new THREE.Box3Helper(box, 0xffb84c); scene.add(selHelper); }
+}
+function focusNode(o){
+  const box = new THREE.Box3().setFromObject(o); if(box.isEmpty()) return;
+  const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const r = Math.max(size.x, size.y, size.z) || 1;
+  const d = r / (2 * Math.tan(camera.fov * Math.PI / 360)) * 1.8;
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  controls.target.copy(c); camera.position.copy(c).add(dir.multiplyScalar(d)); controls.update();
+}
+$('htree').addEventListener('click', e => {
+  const b = e.target.closest('.hn'); if(!b) return;
+  if(e.target.closest('summary') && e.detail === 0) return;      // keyboard toggle on summary
+  const o = current?.getObjectByProperty('uuid', b.dataset.u); if(!o) return;
+  selectNode(o);
+  if(e.target.closest('summary')) e.preventDefault();             // don't collapse on select
+  focusNode(o);
+});
+$('tHier').onclick = e => { $('hier').hidden = !$('hier').hidden; e.currentTarget.classList.toggle('on', !$('hier').hidden); };
+// click a mesh in 3D → select its GameObject
+{
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let down = null;
+  renderer.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+  renderer.domElement.addEventListener('pointerup', e => {
+    if(!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5 || $('tHier').hidden || !current) return;
+    const r = renderer.domElement.getBoundingClientRect();
+    ptr.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const hit = ray.intersectObject(current, true).find(h => h.object.visible && !h.object.userData.placeholder);
+    let o = hit?.object; while(o && (o.userData.skip || !o.userData.h) && o !== current) o = o.parent;
+    selectNode(o && o !== current ? o : null);
+  });
 }
 
 function fit(){
