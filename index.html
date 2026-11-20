@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-0CZ4GSFz33HuxQ5tyTWEBCImrqU/cAgistTxx66Fl2k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-e5GO7v9kLfG/JNgUswPH5arzxFhzkdS30M/2otUiuP0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -213,6 +213,37 @@ html[dir=ltr] .kv dd{text-align:left}
 .bar .bt{height:14px;border-radius:0 4px 4px 0;background:#ffffff0d;overflow:hidden;direction:ltr}
 .bar .bf{display:block;height:100%;background:#4c9bff;border-radius:0 4px 4px 0;min-width:2px}
 .bar .bv{color:var(--dim);font-size:12.5px;direction:ltr;white-space:nowrap}
+/* GitHub-wide search */
+#searchDlg{width:min(900px,calc(100vw - 32px))}
+.tokbox{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:12px}
+.tokbox summary{cursor:pointer;min-height:32px;display:flex;align-items:center;gap:6px;font-size:14px}
+.tokbox summary #tokState{color:var(--dim);font-size:13px}
+.tokbox .srow{margin-top:8px}
+.tokbox a{color:var(--accent)}
+.srow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.stabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--dim)}
+.inp{min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:15px}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
+.srange{display:flex;align-items:center;gap:8px;min-height:42px}
+.srange input{width:170px;accent-color:var(--accent)}
+.srange output{min-width:44px;color:var(--ink);font-variant-numeric:tabular-nums;direction:ltr}
+#sRandom[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+#sProg{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:10px}
+#sProg .xh{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:6px}
+#sProg .btn{min-height:34px;padding:0 12px;font-size:13px}
+.sresults{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.sres{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);cursor:pointer;text-align:start}
+.sres:hover{border-color:#4a505b}
+.sres:focus-visible{outline:2px solid var(--accent2);outline-offset:1px}
+.sth{width:64px;height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:11px;font-weight:700;direction:ltr;background:#15171a;position:relative}
+.sth img{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);object-fit:contain}
+.sinfo{min-width:0}
+.sinfo b,.sinfo small{display:block;direction:ltr;text-align:start;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sinfo small{color:var(--dim);font-size:12px}
+.sinfo code{display:block;margin-top:4px;font:11.5px/1.4 ui-monospace,Consolas,monospace;color:#c8cdd6;direction:ltr;text-align:start;white-space:pre-wrap;overflow-wrap:anywhere;max-height:2.9em;overflow:hidden}
+.sscore{align-self:start;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;background:#4c9bff2e;color:#9cc7ff;white-space:nowrap}
+.sscore.exact{background:#5ad18a2e;color:#8fe3b0}
 /* editor scan */
 .finding{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
 .finding>button{display:block;width:100%;border:0;background:var(--panel2);padding:8px 12px;text-align:start;cursor:pointer;direction:ltr}
@@ -272,6 +303,7 @@ html[dir=ltr] .kv dd{text-align:left}
       <summary class="btn"><span aria-hidden="true">★</span><span data-t="favs"></span></summary>
       <div class="menu" id="favList"></div>
     </details>
+    <button class="btn" type="button" id="searchBtn"><span aria-hidden="true">🔎</span><span data-t="sOpen"></span></button>
     <button class="btn" type="button" id="lang" lang="en">English</button>
   </div>
   <input type="file" id="pickFiles" multiple hidden>
@@ -360,6 +392,46 @@ html[dir=ltr] .kv dd{text-align:left}
     <button class="tab" role="tab" type="button" data-tab="editor" data-t="tabEditor" aria-selected="false"></button>
   </div>
   <div class="dbody" id="infoBody" role="tabpanel"></div>
+</dialog>
+
+<dialog id="searchDlg">
+  <div class="dh"><b data-t="sTitle"></b><button class="btn icon" type="button" id="sClose" data-t-aria="close" aria-label="">✕</button></div>
+  <div class="dbody">
+    <details class="tokbox" id="tokBox">
+      <summary><span data-t="sTokenLabel"></span> · <span id="tokState"></span></summary>
+      <div class="srow">
+        <input id="tokIn" class="inp" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" data-t-aria="sTokenLabel" aria-label="" style="flex:1 1 240px">
+        <button class="btn primary" type="button" id="tokSave" data-t="sSave"></button>
+        <button class="btn" type="button" id="tokDel" data-t="sRemove"></button>
+      </div>
+      <p class="dnote"><span data-t="sTokenHint"></span> <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" data-t="sTokenMake"></a></p>
+    </details>
+    <div class="stabs" role="group">
+      <button type="button" class="chip" data-mode="name" data-t="sModeName"></button>
+      <button type="button" class="chip" data-mode="code" data-t="sModeCode"></button>
+      <button type="button" class="chip" data-mode="img" data-t="sModeImg"></button>
+      <button type="button" class="chip" data-mode="model" data-t="sModeModel"></button>
+    </div>
+    <form class="srow" id="sForm">
+      <input id="sq" class="inp" type="search" autocomplete="off" spellcheck="false" style="flex:1 1 260px;direction:ltr">
+      <button class="btn" type="button" id="sFileBtn" hidden><span aria-hidden="true">📎</span><span id="sFileName"></span></button>
+      <input type="file" id="sFile" hidden>
+      <button class="btn primary" type="submit" id="sGo" data-t="sGo"></button>
+    </form>
+    <div class="srow">
+      <label class="field"><span data-t="sMin"></span><span class="srange"><input type="range" id="sMinR" min="50" max="100" step="1" value="80"><output id="sMinV" for="sMinR">80%</output></span></label>
+      <label class="field"><span data-t="sCount"></span><input type="number" id="sCountIn" class="inp" min="1" max="30" step="1" value="6" style="width:96px"></label>
+      <button class="btn" type="button" id="sRandom" aria-pressed="false"><span aria-hidden="true">🎲</span><span data-t="sRandom"></span></button>
+      <span style="flex:1"></span>
+      <button class="btn" type="button" id="sClearSeen" data-t="sClear"></button>
+    </div>
+    <div id="sProg" hidden>
+      <div class="xh"><span id="sProgText"></span><button class="btn" type="button" id="sCancelBtn" data-t="sCancel"></button></div>
+      <div class="xbar" id="sBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-labelledby="sProgText"><i></i></div>
+    </div>
+    <p class="dnote" id="sStatus" role="status" aria-live="polite"></p>
+    <div class="sresults" id="sResults"></div>
+  </div>
 </dialog>
 
 <dialog id="usesDlg">
@@ -455,6 +527,20 @@ ar:{
   glWait:'GitLab حدّد عدد الطلبات بدون تسجيل دخول، ننتظر شوية ونكمّل تلقائياً…',
   xferOne:'جاري التحميل: {0}', xferMany:'جاري تحميل {0} ملف', xferOf:'{0} من {1} · {2}', xferDone:'اكتمل ✓',
   netFail:'انقطع الاتصال أثناء التحميل.', retry:'إعادة المحاولة', online:'رجع الاتصال ✓', offline:'انقطع الاتصال بالإنترنت',
+  sOpen:'بحث بـGitHub', sTitle:'بحث بكل GitHub (مشاريع Unity العامة)', sTokenLabel:'GitHub token',
+  sTokenHint:'ينحفظ بهذا المتصفح بس، وينرسل لـapi.github.com فقط. يكفي توكن fine-grained بدون أي صلاحيات إضافية (يقرا المشاريع العامة).',
+  sTokenMake:'سوّي توكن', sSave:'احفظ', sRemove:'امسح التوكن', sTokenSaved:'محفوظ (ينتهي بـ{0})', sTokenNone:'ماكو توكن محفوظ',
+  sTokenOk:'التوكن شغّال · باقي {0} بحث بالدقيقة', sNeedToken:'البحث بكل GitHub يحتاج توكن. حطه فوق مرة وحدة.',
+  sModeName:'اسم الملف', sModeCode:'محتوى الكود', sModeImg:'صورة', sModeModel:'موديل 3D',
+  sQName:'اسم الملف، مثلاً player.cs', sQCode:'كلمة بالكود، مثلاً PlayerMovement',
+  sPickImg:'اختار صورة (png أو jpg أو tga)', sPickModel:'اختار موديل (fbx أو obj أو glb)',
+  sMin:'أقل تشابه', sCount:'عدد النتائج', sRandom:'عشوائي', sGo:'دوّر', sCancel:'إلغاء',
+  sClear:'مسح السجل', sCleared:'انمسح السجل. النتائج القديمة ممكن ترجع تطلع.',
+  sSearching:'جاري البحث بـGitHub…', sFetching:'جاري جلب ومقارنة الملفات المرشحة… {0} / {1}', sThumbs:'جاري تجهيز الصور المصغرة… {0} / {1}',
+  sRate:'وصلنا حد البحث بـGitHub. باقي {0} ثانية ونكمّل تلقائياً…', sNone:'ما لكيت نتائج جديدة بهالتشابه. جرّب تقلل النسبة أو امسح السجل.',
+  sFound:'{0} نتيجة', sExact:'نفس الملف بالضبط', sTokenBad:'التوكن غير صالح أو منتهي.', sBadQuery:'GitHub ما قبل هالبحث. جرّب كلمة ثانية.',
+  sCancelled:'تم إلغاء البحث.', sBadFile:'الملف اللي اخترته مو من نوعه، أو ممنوع لأسباب أمان.',
+  sSeen:'{0} نتيجة طلعت قبل بهالجلسة وانخفت', sScanned:'انقارن {0} ملف',
 },
 en:{
   title:'Unity Project Viewer', show:'Show', urlLabel:'GitHub or GitLab project link',
@@ -514,6 +600,20 @@ en:{
   glWait:'GitLab is limiting anonymous requests; waiting a moment and continuing automatically…',
   xferOne:'Loading: {0}', xferMany:'Loading {0} files', xferOf:'{0} of {1} · {2}', xferDone:'Done ✓',
   netFail:'The connection dropped during the download.', retry:'Retry', online:'Connection restored ✓', offline:'You are offline',
+  sOpen:'Search GitHub', sTitle:'Search all of GitHub (public Unity projects)', sTokenLabel:'GitHub token',
+  sTokenHint:'Stored in this browser only and sent to api.github.com only. A fine-grained token with no extra permissions is enough (reads public repositories).',
+  sTokenMake:'Create a token', sSave:'Save', sRemove:'Remove token', sTokenSaved:'Saved (ends in {0})', sTokenNone:'No token saved',
+  sTokenOk:'Token works · {0} searches left this minute', sNeedToken:'Searching all of GitHub needs a token. Add it above once.',
+  sModeName:'File name', sModeCode:'Code content', sModeImg:'Image', sModeModel:'3D model',
+  sQName:'File name, e.g. player.cs', sQCode:'Word in code, e.g. PlayerMovement',
+  sPickImg:'Choose an image (png, jpg or tga)', sPickModel:'Choose a model (fbx, obj or glb)',
+  sMin:'Minimum similarity', sCount:'Results', sRandom:'Random', sGo:'Search', sCancel:'Cancel',
+  sClear:'Clear history', sCleared:'History cleared. Earlier results can show up again.',
+  sSearching:'Searching GitHub…', sFetching:'Fetching and comparing candidates… {0} / {1}', sThumbs:'Preparing thumbnails… {0} / {1}',
+  sRate:'GitHub search limit reached. {0} seconds left, then it continues automatically…', sNone:'No new results at this similarity. Lower it or clear the history.',
+  sFound:'{0} results', sExact:'Exactly the same file', sTokenBad:'The token is invalid or expired.', sBadQuery:'GitHub rejected this search. Try another word.',
+  sCancelled:'Search cancelled.', sBadFile:'The chosen file is not what its type says, or is blocked for safety.',
+  sSeen:'{0} results already shown this session are hidden', sScanned:'{0} files compared',
 }};
 let lang = store.get('lang', 'ar') === 'en' ? 'en' : 'ar';
 const t = (k, ...a) => (STR[lang][k] ?? STR.ar[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
@@ -540,6 +640,7 @@ function applyLang(){
   if(current && !$('tHier').hidden) showHierarchy(current, true);
   if(measureOn) updateMeasure();
   if($('infoDlg').open) renderInfoTab();
+  renderSearchUI();
 }
 $('lang').onclick = () => { lang = lang === 'ar' ? 'en' : 'ar'; store.set('lang', lang); applyLang(); };
 
@@ -609,9 +710,11 @@ const stalls = new Set(), netFails = new Set();
    Bytes already received are kept; "retry" asks only for the rest with an HTTP Range request
    (when the server ignores it, the download starts over). */
 async function fetchWatched(url, opts = {}){
-  const {quiet, label, size, ...init} = opts;
+  const {quiet, label, size, signal, maxBytes, ...init} = opts;
   const expect = size > 0 ? size : null;                 // real size from the file list (wire may be gzip)
   const ctrl = new AbortController();
+  if(signal){ if(signal.aborted) ctrl.abort(); else signal.addEventListener('abort', () => ctrl.abort(), {once:true}); }
+  let tooBig = false;
   const w = {ctrl, last:Date.now(), stalled:false, paused:false};
   const tick = () => { w.last = Date.now(); if(w.stalled){ w.stalled = false; stalls.delete(w); renderStall(); } };
   const timer = setInterval(() => {
@@ -644,12 +747,14 @@ async function fetchWatched(url, opts = {}){
             const {done, value} = await reader.read();
             if(done) break;
             chunks.push(value); n += value.length; tick();
+            if(maxBytes && n > maxBytes){ tooBig = true; ctrl.abort(); throw new Silent(); }
             if(total !== null && n > total){ total = null; resumable = false; }   // compressed transfer
             xferUpdate(xf, n, total);
           }
         }
         break;
       }catch(e){
+        if(tooBig) throw new Silent();
         if(ctrl.signal.aborted) throw new TErr('cancelled');
         if(quiet) throw e;
         w.paused = true; xferPause(xf, true);
@@ -947,13 +1052,16 @@ const readText = async (p, opts) => {
 /* ---------- GitHub / GitLab APIs ---------- */
 async function apiJson(url, headers){
   const {r, buf} = await (url.startsWith('https://gitlab.com/') ? glFetch : fetchWatched)(url, {label:t('fetching'), ...(headers ? {headers} : {})});
+  if(r.status === 401 && headers?.Authorization) throw new TErr('sTokenBad');
   if(r.status === 404 || r.status === 401) throw new TErr('notFound');
   if(r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0')) throw new TErr('rateLimit');
   if(r.status === 403 && repo?.kind === 'gl') throw new TErr('notFound');
   if(!r.ok) throw new TErr('ghErr', r.status);
   return JSON.parse(td.decode(buf));
 }
-const ghApi = p => apiJson('https://api.github.com' + p, {Accept:'application/vnd.github+json'});
+// with a token: 5000 requests/hour instead of 60; a rejected token falls back to anonymous (public repos still open)
+const ghApi = p => apiJson('https://api.github.com' + p, {Accept:'application/vnd.github+json', ...authHeaders()})
+  .catch(e => { if(e?.k?.[0] === 'sTokenBad') return apiJson('https://api.github.com' + p, {Accept:'application/vnd.github+json'}); throw e; });
 const glApi = p => apiJson('https://gitlab.com/api/v4' + p);
 
 let repoNote = [];   // keys shown under the title
@@ -1013,7 +1121,13 @@ function afterLoad(){
   renderTitle(); renderNote(); renderFilters(); renderList(); renderSelbar();
   const n3 = files.filter(f => f.cat === '3d').length, n = files.length;
   setMsg(['fetched', nf(n)], n3 ? ['has3d', nf(n3)] : ['no3d']);
+  // opened from a GitHub search result → jump straight to that file
+  if(pendingOpen && repo.kind === 'gh' && `${repo.owner}/${repo.name}`.toLowerCase() === pendingOpen.key){
+    const f = fileByPath.get(pendingOpen.path); pendingOpen = null;
+    if(f){ $('q').value = f.name; query = f.name.toLowerCase(); renderFilters(); renderList(); selectRow(f); }
+  }
 }
+let pendingOpen = null;
 function renderTitle(){
   $('star').hidden = !repo || repo.kind === 'local';
   $('infoBtn').hidden = !files.length;
@@ -2609,6 +2723,356 @@ function renderEditor(){
     editorResult = out;
     if(infoTab === 'editor') renderEditor();
   };
+}
+
+/* =====================================================================
+   GitHub-wide search. The token stays in this browser (localStorage) and is
+   only ever attached to requests to api.github.com — never to raw/media files.
+   ===================================================================== */
+function tokenGet(){ const v = store.get('ghToken', ''); return typeof v === 'string' ? v.trim() : ''; }
+function authHeaders(){ const k = tokenGet(); return k ? {Authorization:'Bearer ' + k} : {}; }
+const S = {mode:'name', random:false, ctrl:null, file:null, fileMode:null, rate:null, results:[], hidden:0, scanned:0, mem:null};
+const SEEN_KEY = 'ghSearchSeen';
+function seenGet(){
+  try{ const v = sessionStorage.getItem(SEEN_KEY); return new Set(v ? JSON.parse(v) : []); }
+  catch(e){ return S.mem || (S.mem = new Set()); }
+}
+function seenAdd(keys){
+  const s = seenGet(); keys.forEach(k => s.add(k));
+  try{ sessionStorage.setItem(SEEN_KEY, JSON.stringify([...s])); }catch(e){ S.mem = s; }
+}
+function renderSearchUI(){
+  const k = tokenGet();
+  $('tokState').textContent = k ? t('sTokenSaved', '…' + k.slice(-4)) : t('sTokenNone');
+  $('tokDel').hidden = !k;
+  document.querySelectorAll('#searchDlg [data-mode]').forEach(b => { const on = b.dataset.mode === S.mode; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const text = S.mode === 'name' || S.mode === 'code';
+  $('sq').hidden = !text; $('sFileBtn').hidden = text;
+  $('sq').placeholder = t(S.mode === 'name' ? 'sQName' : 'sQCode');
+  $('sq').setAttribute('aria-label', $('sq').placeholder);
+  $('sFileName').textContent = S.file && S.fileMode === S.mode ? plainName(S.file.name) : t(S.mode === 'img' ? 'sPickImg' : 'sPickModel');
+  $('sFile').accept = S.mode === 'img' ? '.png,.jpg,.jpeg,.tga' : '.fbx,.obj,.glb';
+  $('sRandom').setAttribute('aria-pressed', String(S.random));
+}
+$('searchBtn').onclick = () => { closeMenus(); renderSearchUI(); if(!tokenGet()) $('tokBox').open = true; $('searchDlg').showModal(); };
+$('sClose').onclick = () => $('searchDlg').close();
+$('searchDlg').addEventListener('click', e => { if(e.target === $('searchDlg')) $('searchDlg').close(); });
+$('searchDlg').addEventListener('close', () => S.ctrl?.abort());
+document.querySelector('#searchDlg .stabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-mode]'); if(!b) return;
+  S.mode = b.dataset.mode; renderSearchUI(); $('sResults').innerHTML = ''; sStatusText('');
+});
+$('sFileBtn').onclick = () => $('sFile').click();
+$('sFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if(!f) return; S.file = f; S.fileMode = S.mode; renderSearchUI(); };
+$('sMinR').oninput = e => $('sMinV').textContent = e.target.value + '%';
+$('sRandom').onclick = () => { S.random = !S.random; renderSearchUI(); };
+$('sClearSeen').onclick = () => { try{ sessionStorage.removeItem(SEEN_KEY); }catch(e){} S.mem = null; sStatusText(t('sCleared')); };
+$('sCancelBtn').onclick = () => S.ctrl?.abort();
+$('sForm').addEventListener('submit', e => { e.preventDefault(); runSearch(); });
+$('tokSave').onclick = async () => {
+  const v = $('tokIn').value.trim(); if(!v) return;
+  store.set('ghToken', v); $('tokIn').value = ''; renderSearchUI();
+  try{   // check it right away (this call goes to api.github.com only)
+    const {r, buf} = await fetchWatched('https://api.github.com/rate_limit', {quiet:true, headers:{Accept:'application/vnd.github+json', ...authHeaders()}});
+    if(r.status === 401){ sStatusText(t('sTokenBad'), true); return; }
+    const j = JSON.parse(td.decode(buf));
+    sStatusText(t('sTokenOk', nf(j.resources?.code_search?.remaining ?? j.resources?.search?.remaining ?? 0)));
+    $('tokBox').open = false;
+  }catch(e){}
+};
+$('tokDel').onclick = () => { try{ localStorage.removeItem('ghToken'); }catch(e){} renderSearchUI(); $('tokBox').open = true; };
+function sStatusText(text, bad){ $('sStatus').textContent = text || ''; $('sStatus').style.color = bad ? 'var(--bad)' : ''; }
+function sProg(text, d, n){
+  $('sProg').hidden = false; $('sProgText').textContent = text;
+  const bar = $('sBar');
+  bar.classList.toggle('ind', !n);
+  bar.firstElementChild.style.width = n ? (d / n * 100).toFixed(1) + '%' : '';
+  if(n) bar.setAttribute('aria-valuenow', Math.round(d / n * 100)); else bar.removeAttribute('aria-valuenow');
+}
+const sleep = (ms, signal) => new Promise((res, rej) => {
+  const id = setTimeout(res, ms);
+  signal?.addEventListener('abort', () => { clearTimeout(id); rej(new TErr('cancelled')); }, {once:true});
+});
+async function waitRate(secs, signal){
+  for(let s = Math.max(1, Math.ceil(secs)); s > 0; s--){ sProg(t('sRate', s), 0, 0); await sleep(1000, signal); }
+}
+/* code search (10 requests/minute with a token): waits out the limit with a live countdown */
+async function searchApi(q, page, perPage, textMatch){
+  const signal = S.ctrl.signal;
+  for(let tries = 0; ; tries++){
+    if(S.rate && S.rate.rem === 0 && S.rate.reset * 1000 > Date.now()) await waitRate(S.rate.reset - Date.now() / 1000, signal);
+    sProg(t('sSearching'), 0, 0);
+    const url = `https://api.github.com/search/code?q=${encodeURIComponent(q)}&per_page=${perPage}&page=${page}`;
+    const {r, buf} = await fetchWatched(url, {quiet:true, signal, headers:{Accept: textMatch ? 'application/vnd.github.text-match+json' : 'application/vnd.github+json', ...authHeaders()}});
+    const rem = r.headers.get('x-ratelimit-remaining'), reset = +r.headers.get('x-ratelimit-reset');
+    if(rem !== null) S.rate = {rem:+rem, reset};
+    if(r.status === 401) throw new TErr('sTokenBad');
+    if(r.status === 422) throw new TErr('sBadQuery');
+    if((r.status === 403 || r.status === 429) && tries < 5){
+      const ra = +r.headers.get('retry-after');
+      await waitRate(ra || (reset ? reset - Date.now() / 1000 : 60), signal);
+      continue;
+    }
+    if(!r.ok) throw new TErr('ghErr', r.status);
+    return JSON.parse(td.decode(buf));
+  }
+}
+const extOf = n => (n.match(/\.([^.\/]+)$/) || [])[1]?.toLowerCase() || '';
+function candOf(item, assetPath){
+  const path = assetPath ?? item.path, name = path.split('/').pop();
+  const ref = (item.html_url.split('/blob/')[1] || '').split('/')[0] || 'HEAD';
+  return {repo:item.repository.full_name, ref, path, name, ext:extOf(name), key:`${item.repository.full_name}:${path}`,
+          frags:(item.text_matches || []).map(m => m.fragment || '')};
+}
+// Unity projects only (path inside Assets/), and the same name/program rules as the viewer
+const okCand = c => /(^|\/)Assets\//.test(c.path) && !HIDDEN_RE.test(c.path) && !HIDDEN_RE.test(c.repo) && !EXEC_EXT.has(c.ext);
+const rawOf = c => `https://raw.githubusercontent.com/${c.repo}/${c.ref}/${enc(c.path)}`;
+const mediaOf = c => `https://media.githubusercontent.com/media/${c.repo}/${c.ref}/${enc(c.path)}`;
+async function candBuffer(c, signal){
+  let {r, buf} = await fetchWatched(rawOf(c), {quiet:true, signal, maxBytes:40 * 1048576});
+  if(!r.ok) throw new Silent();
+  if(buf.byteLength < 400 && td.decode(buf).startsWith('version https://git-lfs')){
+    ({r, buf} = await fetchWatched(mediaOf(c), {quiet:true, signal, maxBytes:40 * 1048576}));
+    if(!r.ok) throw new Silent();
+  }
+  if(sniff(buf, c.ext) !== 'ok') throw new Silent();       // same disguise / program checks as the viewer
+  return buf;
+}
+const sha256 = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
+async function decodeImage(buf, ext){
+  if(ext === 'tga'){
+    const d = new TGALoader().parse(buf);
+    const cv = document.createElement('canvas'); cv.width = d.width; cv.height = d.height;
+    cv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(d.data.buffer, d.data.byteOffset, d.width * d.height * 4), d.width, d.height), 0, 0);
+    return cv;
+  }
+  return createImageBitmap(new Blob([buf]));
+}
+/* difference hash: 64 horizontal + 64 vertical gradient bits on a 9×9 grayscale thumbnail */
+function dHash(src){
+  const mid = document.createElement('canvas'); mid.width = mid.height = 64;
+  const mx = mid.getContext('2d'); mx.fillStyle = '#808080'; mx.fillRect(0, 0, 64, 64); mx.imageSmoothingQuality = 'high'; mx.drawImage(src, 0, 0, 64, 64);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 9;
+  const cx = cv.getContext('2d', {willReadFrequently:true}); cx.imageSmoothingQuality = 'high'; cx.drawImage(mid, 0, 0, 9, 9);
+  const d = cx.getImageData(0, 0, 9, 9).data, g = (x, y) => { const i = (y * 9 + x) * 4; return d[i] * .299 + d[i+1] * .587 + d[i+2] * .114; };
+  const bits = [];
+  for(let y = 0; y < 8; y++) for(let x = 0; x < 8; x++) bits.push(g(x, y) < g(x + 1, y) ? 1 : 0);
+  for(let y = 0; y < 8; y++) for(let x = 0; x < 8; x++) bits.push(g(x, y) < g(x, y + 1) ? 1 : 0);
+  return bits;
+}
+const hashSim = (a, b) => { let s = 0; for(let i = 0; i < a.length; i++) if(a[i] === b[i]) s++; return s / a.length; };
+function thumbOf(src){
+  const k = Math.min(128 / src.width, 128 / src.height, 1);
+  const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(src.width * k)); cv.height = Math.max(1, Math.round(src.height * k));
+  cv.getContext('2d').drawImage(src, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/png');
+}
+async function parseModelBuffer(buf, ext){
+  const mgr = new THREE.LoadingManager();
+  mgr.setURLModifier(u => /^(blob|data):/.test(u) ? u : BLANK_PNG);      // never fetch textures of candidates
+  if(ext === 'fbx') return new FBXLoader(mgr).parse(buf, '');
+  if(ext === 'obj') return new OBJLoader(mgr).parse(td.decode(buf));
+  if(ext === 'glb' || ext === 'gltf') return (await parseP(new GLTFLoader(mgr), buf, '')).scene;
+  throw new TErr('sBadFile');
+}
+function modelStats(obj){
+  obj.updateMatrixWorld(true);
+  let v = 0, tr = 0;
+  obj.traverse(o => { if(o.isMesh){ const g = o.geometry, n = g.attributes.position?.count || 0; v += n; tr += (g.index ? g.index.count : n) / 3; } });
+  const s = new THREE.Box3().setFromObject(obj).getSize(new THREE.Vector3());
+  const dims = [s.x, s.y, s.z].sort((a, b) => b - a), m = dims[0] || 1;
+  return {v, t:tr, dims:dims.map(d => d / m)};             // sorted proportions: independent of rotation and units
+}
+const ratio = (a, b) => (a || b) ? Math.min(a, b) / Math.max(a, b) : 1;
+const modelSim = (a, b) => .35 * ratio(a.v, b.v) + .35 * ratio(a.t, b.t) + .3 * Math.max(0, 1 - (Math.abs(a.dims[1] - b.dims[1]) + Math.abs(a.dims[2] - b.dims[2])) / 2);
+function lev(a, b){
+  const m = a.length, n = b.length, d = Array.from({length:n + 1}, (_, j) => j);
+  for(let i = 1; i <= m; i++){ let p = d[0]; d[0] = i; for(let j = 1; j <= n; j++){ const tmp = d[j]; d[j] = Math.min(d[j] + 1, d[j-1] + 1, p + (a[i-1] === b[j-1] ? 0 : 1)); p = tmp; } }
+  return d[n];
+}
+const nameSim = (a, b) => { a = a.toLowerCase(); b = b.toLowerCase(); return a === b ? 1 : 1 - lev(a, b) / (Math.max(a.length, b.length) || 1); };
+function codeSim(term, frags){
+  if(!frags.length) return .9;
+  if(frags.some(f => f.includes(term))) return 1;
+  const lt = term.toLowerCase();
+  if(frags.some(f => f.toLowerCase().includes(lt))) return .95;
+  const words = lt.split(/\s+/).filter(Boolean), all = frags.join(' ').toLowerCase();
+  return .9 * words.filter(w => all.includes(w)).length / (words.length || 1);
+}
+function bestFrag(term, frags){
+  const lt = term.toLowerCase(), f = frags.find(x => x.toLowerCase().includes(lt)) || frags[0] || '';
+  let i = Math.max(0, f.toLowerCase().indexOf(lt) - 50);
+  if(i > 0){ const sp = f.slice(i).search(/\s/); if(sp >= 0 && sp < 20) i += sp + 1; }   // start on a word boundary
+  return (i > 0 ? '… ' : '') + f.slice(i, i + 160).replace(/\s+/g, ' ').trim();
+}
+function pick(list, want, random){
+  if(random) for(let i = list.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+  else list.sort((a, b) => b.score - a.score);
+  return list.slice(0, want);
+}
+/* name / code search: one or more result pages, scored and filtered by the similarity bar */
+async function textSearch(q, scoreFn, want, thr, random, textMatch){
+  const seen = seenGet(), keys = new Set(), out = [];
+  let page = 1;
+  for(let req = 0; req < 3 && out.length < want * (random ? 3 : 1); req++){
+    const j = await searchApi(q, page, 50, textMatch);
+    for(const it of j.items || []){
+      const c = candOf(it);
+      if(!okCand(c) || keys.has(c.key)) continue;
+      keys.add(c.key);
+      if(seen.has(c.key)){ S.hidden++; continue; }
+      c.score = scoreFn(c);
+      if(c.score >= thr) out.push(c);
+    }
+    const maxPage = Math.ceil(Math.min(j.total_count || 0, 1000) / 50);
+    if(maxPage <= 1) break;
+    page = random ? 1 + Math.floor(Math.random() * Math.min(maxPage, 20)) : page + 1;
+    if(!random && page > maxPage) break;
+  }
+  return pick(out, want, random);
+}
+/* image / model candidates: GitHub doesn't index binary files, but Unity's .meta files are text,
+   so search TextureImporter / ModelImporter metas (Unity projects only) and take their asset */
+async function metaCandidates(kind, hintName, cap, random){
+  const exts = kind === 'img' ? ['png','jpg','jpeg','tga'] : ['fbx','obj','glb'];
+  const importer = kind === 'img' ? 'TextureImporter' : 'ModelImporter';
+  const seen = seenGet(), keys = new Set(), out = [];
+  const queries = [];
+  const hint = String(hintName || '').replace(/["\s\\]+/g, '');
+  if(hint) queries.push([`filename:${hint}.meta path:Assets`, 1]);
+  queries.push([`${importer} extension:meta path:Assets`, random ? 1 + Math.floor(Math.random() * 10) : 1]);
+  if(!random) queries.push([`${importer} extension:meta path:Assets`, 2]);
+  for(const [q, page] of queries){
+    if(out.length >= cap) break;
+    let j;
+    try{ j = await searchApi(q, page, 100); }catch(e){ if(e?.k?.[0] === 'sBadQuery') continue; throw e; }
+    for(const it of j.items || []){
+      if(!it.path.endsWith('.meta')) continue;
+      const c = candOf(it, it.path.slice(0, -5));
+      if(!exts.includes(c.ext) || !okCand(c) || keys.has(c.key)) continue;
+      keys.add(c.key);
+      if(seen.has(c.key)){ S.hidden++; continue; }
+      out.push(c);
+      if(out.length >= cap) break;
+    }
+  }
+  return out;
+}
+async function compareAll(cands, measure){
+  const signal = S.ctrl.signal, out = [];
+  let done = 0;
+  S.scanned = cands.length;
+  sProg(t('sFetching', 0, cands.length), 0, cands.length);
+  await pool(cands, 4, async c => {
+    try{ const res = await measure(c); if(res) out.push(res); }        // failed / unsafe candidates drop out silently
+    finally{ done++; if(!signal.aborted) sProg(t('sFetching', done, cands.length), done, cands.length); }
+  });
+  if(signal.aborted) throw new TErr('cancelled');
+  return out;
+}
+async function imageSearch(file, want, thr, random){
+  const buf = await file.arrayBuffer(), ext = extOf(file.name);
+  if(!['png','jpg','jpeg','tga'].includes(ext) || HIDDEN_RE.test(file.name) || sniff(buf, ext) !== 'ok') throw new TErr('sBadFile');
+  const [sha, src] = await Promise.all([sha256(buf), decodeImage(buf, ext)]);
+  const mine = dHash(src);
+  const cands = await metaCandidates('img', file.name, Math.min(60, Math.max(want * 6, 24)), random);
+  const scored = await compareAll(cands, async c => {
+    const b = await candBuffer(c, S.ctrl.signal);
+    const exact = await sha256(b) === sha;
+    const img = await decodeImage(b, c.ext);
+    const sim = exact ? 1 : Math.min(.99, hashSim(mine, dHash(img)));
+    if(sim < thr) return null;
+    Object.assign(c, {score:sim, exact, thumb:thumbOf(img), extra:`${img.width}×${img.height}`});
+    return c;
+  });
+  return pick(scored, want, random);
+}
+async function modelSearch(file, want, thr, random){
+  const buf = await file.arrayBuffer(), ext = extOf(file.name);
+  if(!['fbx','obj','glb'].includes(ext) || HIDDEN_RE.test(file.name) || sniff(buf, ext) !== 'ok') throw new TErr('sBadFile');
+  const sha = await sha256(buf);
+  const mineObj = await parseModelBuffer(buf, ext), mine = modelStats(mineObj); disposeObj(mineObj);
+  const cands = await metaCandidates('model', file.name, Math.min(40, Math.max(want * 5, 16)), random);
+  const scored = await compareAll(cands, async c => {
+    const b = await candBuffer(c, S.ctrl.signal);
+    const exact = await sha256(b) === sha;
+    const obj = await parseModelBuffer(b, c.ext), st = modelStats(obj);
+    const sim = exact ? 1 : Math.min(.99, modelSim(mine, st));
+    if(sim < thr){ disposeObj(obj); return null; }
+    Object.assign(c, {score:sim, exact, thumb:renderThumb(obj), extra:`${nf(st.v)} · ${nf(st.t)}△`});
+    disposeObj(obj);
+    return c;
+  });
+  return pick(scored, want, random);
+}
+/* thumbnails for name/code results that are images or models (also re-checks them for safety) */
+async function addThumbs(list){
+  const todo = list.filter(c => VIEWIMG.includes(c.ext) || c.ext === 'tga' || ['fbx','obj','glb'].includes(c.ext));
+  const bad = new Set(); let done = 0;
+  if(todo.length) sProg(t('sThumbs', 0, todo.length), 0, todo.length);
+  await pool(todo, 4, async c => {
+    try{
+      const b = await candBuffer(c, S.ctrl.signal);
+      if(c.ext === 'fbx' || c.ext === 'obj' || c.ext === 'glb'){ const o = await parseModelBuffer(b, c.ext); c.thumb = renderThumb(o); disposeObj(o); }
+      else c.thumb = thumbOf(await decodeImage(b, c.ext));
+    }catch(e){ if(e instanceof Silent) bad.add(c); }
+    finally{ done++; sProg(t('sThumbs', done, todo.length), done, todo.length); }
+  });
+  if(S.ctrl.signal.aborted) throw new TErr('cancelled');
+  return list.filter(c => !bad.has(c));
+}
+function renderResults(list){
+  S.results = list;
+  $('sResults').innerHTML = list.map((c, i) => {
+    const cls = (catOf(extCat[c.ext] || 'other') || {cls:'cother'}).cls, pct = Math.round(c.score * 100);
+    return `<button type="button" class="sres" data-i="${i}" title="${esc(plainName(c.repo + ' / ' + c.path))}">
+      <span class="sth ${c.thumb ? '' : cls}">${c.thumb ? `<img alt="" src="${esc(c.thumb)}">` : esc(plainName(c.ext || '—').slice(0, 8))}</span>
+      <span class="sinfo"><b>${safeHtml(c.name)}</b><small>${safeHtml(c.repo)}</small><small>${safeHtml(c.path)}${c.extra ? ' · ' + esc(c.extra) : ''}</small>${c.frag ? `<code>${safeHtml(c.frag)}</code>` : ''}</span>
+      <span class="sscore${c.exact ? ' exact' : ''}"${c.exact ? ` title="${esc(t('sExact'))}"` : ''}><bdi dir="ltr">${pct}%</bdi></span></button>`;
+  }).join('');
+}
+$('sResults').addEventListener('click', e => {
+  const b = e.target.closest('.sres'); if(!b) return;
+  const c = S.results[+b.dataset.i]; if(!c) return;
+  $('searchDlg').close();
+  pendingOpen = {key:c.repo.toLowerCase(), path:c.path};
+  $('url').value = `https://github.com/${c.repo}`;
+  loadRepo(`https://github.com/${c.repo}/tree/${c.ref}`);       // the exact commit the result came from
+});
+async function runSearch(){
+  if(!tokenGet()){ $('tokBox').open = true; $('tokIn').focus(); sStatusText(t('sNeedToken'), true); return; }
+  S.ctrl?.abort();
+  const ctrl = S.ctrl = new AbortController();
+  const want = Math.max(1, Math.min(30, Math.round(+$('sCountIn').value || 6))); $('sCountIn').value = want;
+  const thr = +$('sMinR').value / 100, random = S.random;
+  S.hidden = 0; S.scanned = 0;
+  $('sGo').disabled = true; $('sResults').innerHTML = ''; sStatusText('');
+  try{
+    let list;
+    if(S.mode === 'name' || S.mode === 'code'){
+      const term = $('sq').value.trim().replace(/["\\]/g, '');
+      if(!term){ $('sq').focus(); return; }
+      if(S.mode === 'name') list = await textSearch(`filename:${term.replace(/\s+/g, '')} path:Assets`, c => nameSim(term, c.name), want, thr, random, false);
+      else{
+        list = await textSearch(`${/\s/.test(term) ? `"${term}"` : term} path:Assets extension:cs`, c => codeSim(term, c.frags), want, thr, random, true);
+        list.forEach(c => c.frag = bestFrag(term, c.frags));
+      }
+      list = await addThumbs(list);
+    }else{
+      if(!S.file || S.fileMode !== S.mode){ $('sFileBtn').focus(); sStatusText(t(S.mode === 'img' ? 'sPickImg' : 'sPickModel'), true); return; }
+      list = S.mode === 'img' ? await imageSearch(S.file, want, thr, random) : await modelSearch(S.file, want, thr, random);
+    }
+    if(ctrl.signal.aborted) throw new TErr('cancelled');
+    seenAdd(list.map(c => c.key));
+    renderResults(list);
+    sStatusText(list.length
+      ? [t('sFound', nf(list.length)), S.scanned ? t('sScanned', nf(S.scanned)) : '', S.hidden ? t('sSeen', nf(S.hidden)) : ''].filter(Boolean).join(' · ')
+      : t('sNone') + (S.hidden ? ' · ' + t('sSeen', nf(S.hidden)) : ''));
+  }catch(e){
+    if(S.ctrl === ctrl) sStatusText(e?.k?.[0] === 'cancelled' ? t('sCancelled') : tx(errText(e)), e?.k?.[0] !== 'cancelled');
+  }finally{
+    if(S.ctrl === ctrl){ $('sGo').disabled = false; $('sProg').hidden = true; }
+  }
 }
 
 /* =====================================================================
