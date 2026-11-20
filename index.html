@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-e5GO7v9kLfG/JNgUswPH5arzxFhzkdS30M/2otUiuP0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-w0g+F9FrDm5Rhhj8o6/vwwzKVacMj4pqbfEvjC8zqOs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -530,7 +530,8 @@ ar:{
   sOpen:'بحث بـGitHub', sTitle:'بحث بكل GitHub (مشاريع Unity العامة)', sTokenLabel:'GitHub token',
   sTokenHint:'ينحفظ بهذا المتصفح بس، وينرسل لـapi.github.com فقط. يكفي توكن fine-grained بدون أي صلاحيات إضافية (يقرا المشاريع العامة).',
   sTokenMake:'سوّي توكن', sSave:'احفظ', sRemove:'امسح التوكن', sTokenSaved:'محفوظ (ينتهي بـ{0})', sTokenNone:'ماكو توكن محفوظ',
-  sTokenOk:'التوكن شغّال · باقي {0} بحث بالدقيقة', sNeedToken:'البحث بكل GitHub يحتاج توكن. حطه فوق مرة وحدة.',
+  sTokenOk:'التوكن شغّال · باقي {0} بحث بالدقيقة',
+  sTokenShape:'هذا مو توكن GitHub كامل ({0} حرف بس). التوكن يبدي بـgithub_pat_ أو ghp_ وطوله 40 حرف أو أكثر. انسخه كله مرة وحدة.', sNeedToken:'البحث بكل GitHub يحتاج توكن. حطه فوق مرة وحدة.',
   sModeName:'اسم الملف', sModeCode:'محتوى الكود', sModeImg:'صورة', sModeModel:'موديل 3D',
   sQName:'اسم الملف، مثلاً player.cs', sQCode:'كلمة بالكود، مثلاً PlayerMovement',
   sPickImg:'اختار صورة (png أو jpg أو tga)', sPickModel:'اختار موديل (fbx أو obj أو glb)',
@@ -603,7 +604,8 @@ en:{
   sOpen:'Search GitHub', sTitle:'Search all of GitHub (public Unity projects)', sTokenLabel:'GitHub token',
   sTokenHint:'Stored in this browser only and sent to api.github.com only. A fine-grained token with no extra permissions is enough (reads public repositories).',
   sTokenMake:'Create a token', sSave:'Save', sRemove:'Remove token', sTokenSaved:'Saved (ends in {0})', sTokenNone:'No token saved',
-  sTokenOk:'Token works · {0} searches left this minute', sNeedToken:'Searching all of GitHub needs a token. Add it above once.',
+  sTokenOk:'Token works · {0} searches left this minute',
+  sTokenShape:'That is not a complete GitHub token (only {0} characters). Tokens start with github_pat_ or ghp_ and are 40+ characters long. Copy the whole token in one go.', sNeedToken:'Searching all of GitHub needs a token. Add it above once.',
   sModeName:'File name', sModeCode:'Code content', sModeImg:'Image', sModeModel:'3D model',
   sQName:'File name, e.g. player.cs', sQCode:'Word in code, e.g. PlayerMovement',
   sPickImg:'Choose an image (png, jpg or tga)', sPickModel:'Choose a model (fbx, obj or glb)',
@@ -2769,8 +2771,11 @@ $('sRandom').onclick = () => { S.random = !S.random; renderSearchUI(); };
 $('sClearSeen').onclick = () => { try{ sessionStorage.removeItem(SEEN_KEY); }catch(e){} S.mem = null; sStatusText(t('sCleared')); };
 $('sCancelBtn').onclick = () => S.ctrl?.abort();
 $('sForm').addEventListener('submit', e => { e.preventDefault(); runSearch(); });
+// GitHub tokens: classic ghp_ (40 chars), fine-grained github_pat_ (~93), and other gh?_ types
+const TOKEN_RE = /^(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})$/;
 $('tokSave').onclick = async () => {
   const v = $('tokIn').value.trim(); if(!v) return;
+  if(!TOKEN_RE.test(v)){ sStatusText(t('sTokenShape', v.length), true); $('tokIn').focus(); return; }
   store.set('ghToken', v); $('tokIn').value = ''; renderSearchUI();
   try{   // check it right away (this call goes to api.github.com only)
     const {r, buf} = await fetchWatched('https://api.github.com/rate_limit', {quiet:true, headers:{Accept:'application/vnd.github+json', ...authHeaders()}});
