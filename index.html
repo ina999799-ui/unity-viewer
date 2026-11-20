@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-RVgS2VaDkZyh9zmOD7N9DjmfJMHU0lEpMIMTo7pTM4s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-2zgnxlt/3YbygkVDM5xBUborNG5wQrx0JXrDNP1Yo88=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2803,14 +2803,17 @@ const sleep = (ms, signal) => new Promise((res, rej) => {
 async function waitRate(secs, signal){
   for(let s = Math.max(1, Math.ceil(secs)); s > 0; s--){ sProg(t('sRate', s), 0, 0); await sleep(1000, signal); }
 }
-/* code search (10 requests/minute with a token): waits out the limit with a live countdown */
-async function searchApi(q, page, perPage, textMatch){
+/* GitHub's /search/code response deliberately has no browser CORS header.  A
+   static Pages app therefore discovers public Unity repositories first, then
+   scans each repository's recursive tree locally.  /search/repositories and
+   /git/trees both support browser CORS, including authenticated requests. */
+async function repoSearchApi(q, page = 1, perPage = 20){
   const signal = S.ctrl.signal;
   for(let tries = 0; ; tries++){
     if(S.rate && S.rate.rem === 0 && S.rate.reset * 1000 > Date.now()) await waitRate(S.rate.reset - Date.now() / 1000, signal);
     sProg(t('sSearching'), 0, 0);
-    const url = `https://api.github.com/search/code?q=${encodeURIComponent(q)}&per_page=${perPage}&page=${page}`;
-    const {r, buf} = await fetchWatched(url, {quiet:true, signal, headers:{Accept: textMatch ? 'application/vnd.github.text-match+json' : 'application/vnd.github+json', ...authHeaders()}});
+    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=${perPage}&page=${page}`;
+    const {r, buf} = await fetchWatched(url, {quiet:true, signal, headers:{Accept:'application/vnd.github+json', ...authHeaders()}});
     const rem = r.headers.get('x-ratelimit-remaining'), reset = +r.headers.get('x-ratelimit-reset');
     if(rem !== null) S.rate = {rem:+rem, reset};
     if(r.status === 401) throw new TErr('sTokenBad');
@@ -2830,6 +2833,11 @@ function candOf(item, assetPath){
   const ref = (item.html_url.split('/blob/')[1] || '').split('/')[0] || 'HEAD';
   return {repo:item.repository.full_name, ref, path, name, ext:extOf(name), key:`${item.repository.full_name}:${path}`,
           frags:(item.text_matches || []).map(m => m.fragment || '')};
+}
+function treeCand(r, item){
+  const path = item.path, name = path.split('/').pop();
+  return {repo:r.full_name, ref:r.treeSha || r.default_branch, path, name, ext:extOf(name),
+          key:`${r.full_name}:${path}`, frags:[]};
 }
 // Unity projects only (path inside Assets/), and the same name/program rules as the viewer
 const okCand = c => /(^|\/)Assets\//.test(c.path) && !HIDDEN_RE.test(c.path) && !HIDDEN_RE.test(c.repo) && !EXEC_EXT.has(c.ext);
@@ -2917,51 +2925,100 @@ function pick(list, want, random){
   else list.sort((a, b) => b.score - a.score);
   return list.slice(0, want);
 }
-/* name / code search: one or more result pages, scored and filtered by the similarity bar */
-async function textSearch(q, scoreFn, want, thr, random, textMatch){
+async function repoTree(r){
+  const signal = S.ctrl.signal;
+  const url = `https://api.github.com/repos/${r.full_name}/git/trees/${encodeURIComponent(r.default_branch || 'HEAD')}?recursive=1`;
+  const {r:res, buf} = await fetchWatched(url, {quiet:true, signal, headers:{Accept:'application/vnd.github+json', ...authHeaders()}});
+  if(res.status === 401) throw new TErr('sTokenBad');
+  if(!res.ok) throw new Silent();
+  const j = JSON.parse(td.decode(buf));
+  r.treeSha = j.sha || r.default_branch;
+  r.tree = (j.tree || []).filter(x => x.type === 'blob' && /(^|\/)Assets\//.test(x.path));
+  return r.tree.length ? r : null;
+}
+async function discoverRepos(term, random, max = 14){
+  const stem = String(term || '').replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, ' ').trim();
+  const queries = [];
+  if(stem.length >= 3) queries.push(`${stem} unity language:C# archived:false`);
+  queries.push('unity language:C# archived:false stars:>20');
+  const map = new Map();
+  for(const q of queries){
+    const page = random ? 1 + Math.floor(Math.random() * 5) : 1;
+    const j = await repoSearchApi(q, page, 20);
+    for(const r of j.items || []) if(!r.fork && !r.archived && r.default_branch && !map.has(r.full_name)) map.set(r.full_name, r);
+    if(map.size >= max * 2) break;
+  }
+  let repos = [...map.values()];
+  if(random) repos.sort(() => Math.random() - .5);
+  repos = repos.slice(0, max);
+  const good = []; let done = 0;
+  sProg(t('sFetching', 0, repos.length), 0, repos.length);
+  await pool(repos, 3, async r => {
+    try{ const x = await repoTree(r); if(x) good.push(x); }catch(e){ if(!(e instanceof Silent)) throw e; }
+    finally{ done++; if(!S.ctrl.signal.aborted) sProg(t('sFetching', done, repos.length), done, repos.length); }
+  });
+  if(S.ctrl.signal.aborted) throw new TErr('cancelled');
+  return good;
+}
+async function nameTreeSearch(term, want, thr, random){
+  const repos = await discoverRepos(term, random, Math.max(12, want * 2));
   const seen = seenGet(), keys = new Set(), out = [];
-  let page = 1;
-  for(let req = 0; req < 3 && out.length < want * (random ? 3 : 1); req++){
-    const j = await searchApi(q, page, 50, textMatch);
-    for(const it of j.items || []){
-      const c = candOf(it);
-      if(!okCand(c) || keys.has(c.key)) continue;
-      keys.add(c.key);
-      if(seen.has(c.key)){ S.hidden++; continue; }
-      c.score = scoreFn(c);
-      if(c.score >= thr) out.push(c);
-    }
-    const maxPage = Math.ceil(Math.min(j.total_count || 0, 1000) / 50);
-    if(maxPage <= 1) break;
-    page = random ? 1 + Math.floor(Math.random() * Math.min(maxPage, 20)) : page + 1;
-    if(!random && page > maxPage) break;
+  for(const r of repos) for(const it of r.tree){
+    const c = treeCand(r, it);
+    if(!okCand(c) || keys.has(c.key)) continue;
+    c.score = nameSim(term, c.name);
+    if(c.score < thr) continue;
+    keys.add(c.key);
+    if(seen.has(c.key)){ S.hidden++; continue; }
+    out.push(c);
   }
   return pick(out, want, random);
 }
-/* image / model candidates: GitHub doesn't index binary files, but Unity's .meta files are text,
-   so search TextureImporter / ModelImporter metas (Unity projects only) and take their asset */
+async function codeTreeSearch(term, want, thr, random){
+  const repos = await discoverRepos(term, random, Math.max(10, want + 5));
+  let cands = [];
+  for(const r of repos){
+    let cs = r.tree.filter(x => /\.cs$/i.test(x.path));
+    if(random) cs.sort(() => Math.random() - .5);
+    cands.push(...cs.slice(0, 100).map(x => treeCand(r, x)));
+  }
+  cands = cands.slice(0, 700); S.scanned = cands.length;
+  const seen = seenGet(), out = [], signal = S.ctrl.signal, lt = term.toLowerCase(); let done = 0;
+  sProg(t('sFetching', 0, cands.length), 0, cands.length);
+  await pool(cands, 8, async c => {
+    try{
+      if(seen.has(c.key)){ S.hidden++; return; }
+      const b = await candBuffer(c, signal), txt = td.decode(b), at = txt.toLowerCase().indexOf(lt);
+      if(at < 0) return;
+      const lineStart = Math.max(0, txt.lastIndexOf('\n', at - 1) + 1), lineEnd = txt.indexOf('\n', at + term.length);
+      c.frags = [txt.slice(lineStart, lineEnd < 0 ? Math.min(txt.length, lineStart + 240) : lineEnd)];
+      c.score = codeSim(term, c.frags);
+      if(c.score >= thr){ c.frag = bestFrag(term, c.frags); out.push(c); }
+    }catch(e){ if(!(e instanceof Silent)) throw e; }
+    finally{ done++; if(!signal.aborted && (done % 5 === 0 || done === cands.length)) sProg(t('sFetching', done, cands.length), done, cands.length); }
+  });
+  if(signal.aborted) throw new TErr('cancelled');
+  return pick(out, want, random);
+}
+/* image / model candidates come from Assets paths in the discovered Unity trees. */
 async function metaCandidates(kind, hintName, cap, random){
   const exts = kind === 'img' ? ['png','jpg','jpeg','tga'] : ['fbx','obj','glb'];
-  const importer = kind === 'img' ? 'TextureImporter' : 'ModelImporter';
   const seen = seenGet(), keys = new Set(), out = [];
-  const queries = [];
-  const hint = String(hintName || '').replace(/["\s\\]+/g, '');
-  if(hint) queries.push([`filename:${hint}.meta path:Assets`, 1]);
-  queries.push([`${importer} extension:meta path:Assets`, random ? 1 + Math.floor(Math.random() * 10) : 1]);
-  if(!random) queries.push([`${importer} extension:meta path:Assets`, 2]);
-  for(const [q, page] of queries){
-    if(out.length >= cap) break;
-    let j;
-    try{ j = await searchApi(q, page, 100); }catch(e){ if(e?.k?.[0] === 'sBadQuery') continue; throw e; }
-    for(const it of j.items || []){
-      if(!it.path.endsWith('.meta')) continue;
-      const c = candOf(it, it.path.slice(0, -5));
+  const repos = await discoverRepos(hintName, random, Math.max(12, Math.ceil(cap / 4)));
+  const hint = String(hintName || '').toLowerCase();
+  for(const r of repos){
+    let assets = r.tree.filter(it => exts.includes(extOf(it.path)));
+    assets.sort((a, b) => (b.path.toLowerCase().endsWith('/' + hint) ? 1 : 0) - (a.path.toLowerCase().endsWith('/' + hint) ? 1 : 0));
+    if(random) assets.sort(() => Math.random() - .5);
+    for(const it of assets){
+      const c = treeCand(r, it);
       if(!exts.includes(c.ext) || !okCand(c) || keys.has(c.key)) continue;
       keys.add(c.key);
       if(seen.has(c.key)){ S.hidden++; continue; }
       out.push(c);
       if(out.length >= cap) break;
     }
+    if(out.length >= cap) break;
   }
   return out;
 }
@@ -3059,11 +3116,8 @@ async function runSearch(){
     if(S.mode === 'name' || S.mode === 'code'){
       const term = $('sq').value.trim().replace(/["\\]/g, '');
       if(!term){ $('sq').focus(); return; }
-      if(S.mode === 'name') list = await textSearch(`filename:${term.replace(/\s+/g, '')} path:Assets`, c => nameSim(term, c.name), want, thr, random, false);
-      else{
-        list = await textSearch(`${/\s/.test(term) ? `"${term}"` : term} path:Assets extension:cs`, c => codeSim(term, c.frags), want, thr, random, true);
-        list.forEach(c => c.frag = bestFrag(term, c.frags));
-      }
+      if(S.mode === 'name') list = await nameTreeSearch(term, want, thr, random);
+      else list = await codeTreeSearch(term, want, thr, random);
       list = await addThumbs(list);
     }else{
       if(!S.file || S.fileMode !== S.mode){ $('sFileBtn').focus(); sStatusText(t(S.mode === 'img' ? 'sPickImg' : 'sPickModel'), true); return; }
