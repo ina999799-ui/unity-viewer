@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-OMpRVzJ/R19e9XytoRDkmPIUYudGgSiB05jZDbR0QKw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-6kkNQggwEPPCKPPzalgPWBlisw1H7ZH4S12gKs7eNwo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -541,6 +541,7 @@ ar:{
   sClear:'مسح السجل', sCleared:'انمسح السجل. النتائج القديمة ممكن ترجع تطلع.',
   sSearching:'جاري البحث بـGitHub…', sFetching:'جاري جلب ومقارنة الملفات المرشحة… {0} / {1}', sThumbs:'جاري تجهيز الصور المصغرة… {0} / {1}',
   sRate:'وصلنا حد البحث بـGitHub. باقي {0} ثانية ونكمّل تلقائياً…', sNone:'خلصت كل نتائج GitHub وما لكيت نتائج بهالتشابه. جرّب تقلل النسبة أو امسح السجل.',
+  sStopped:'وقّفت البحث · {0} نتيجة لكيتها لحد هسه',
   sNoRepeat:'عدم التكرار', sSeenCount:'طلعت قبل: {0}', sExhausted:'خلصت نتائج GitHub', sPage:'جاري البحث بـGitHub… صفحة {0} من {1}',
   sFound:'{0} نتيجة', sExact:'نفس الملف بالضبط', sTokenBad:'التوكن غير صالح أو منتهي.', sBadQuery:'GitHub ما قبل هالبحث. جرّب كلمة ثانية.',
   sCancelled:'تم إلغاء البحث.', sBadFile:'الملف اللي اخترته مو من نوعه، أو ممنوع لأسباب أمان.',
@@ -616,6 +617,7 @@ en:{
   sClear:'Clear history', sCleared:'History cleared. Earlier results can show up again.',
   sSearching:'Searching GitHub…', sFetching:'Fetching and comparing candidates… {0} / {1}', sThumbs:'Preparing thumbnails… {0} / {1}',
   sRate:'GitHub search limit reached. {0} seconds left, then it continues automatically…', sNone:'All GitHub results checked, none at this similarity. Lower it or clear the history.',
+  sStopped:'Search stopped · {0} results found so far',
   sNoRepeat:'No repeats', sSeenCount:'Shown before: {0}', sExhausted:'GitHub results exhausted', sPage:'Searching GitHub… page {0} of {1}',
   sFound:'{0} results', sExact:'Exactly the same file', sTokenBad:'The token is invalid or expired.', sBadQuery:'GitHub rejected this search. Try another word.',
   sCancelled:'Search cancelled.', sBadFile:'The chosen file is not what its type says, or is blocked for safety.',
@@ -2987,7 +2989,7 @@ async function walkRepos(term, random, visit, enough){
 /* "No repeats" on: results shown before are skipped and the walk continues to later pages */
 const seenFilter = () => S.noRepeat ? seenGet() : new Set();
 async function nameTreeSearch(term, want, thr, random){
-  const seen = seenFilter(), keys = new Set(), out = [];
+  const seen = seenFilter(), keys = new Set(), out = S.partial = [];      // S.partial: kept if the search is stopped
   const need = random ? want * 3 : want, enough = () => out.length >= need;
   await walkRepos(term, random, trees => {
     for(const r of trees) for(const it of r.tree){
@@ -3004,7 +3006,7 @@ async function nameTreeSearch(term, want, thr, random){
   return pick(out, want, random);
 }
 async function codeTreeSearch(term, want, thr, random){
-  const seen = seenFilter(), out = [], signal = S.ctrl.signal, lt = term.toLowerCase();
+  const seen = seenFilter(), out = S.partial = [], signal = S.ctrl.signal, lt = term.toLowerCase();
   const need = random ? want * 2 : want, enough = () => out.length >= need;
   await walkRepos(term, random, async trees => {
     const cands = [];
@@ -3042,7 +3044,7 @@ async function codeTreeSearch(term, want, thr, random){
 const PER_REPO = 25;
 async function metaSearch(kind, hintName, measure, want, random){
   const exts = kind === 'img' ? ['png','jpg','jpeg','tga'] : ['fbx','obj','glb'];
-  const seen = seenFilter(), keys = new Set(), out = [];
+  const seen = seenFilter(), keys = new Set(), out = S.partial = [];
   const need = random ? want * 2 : want, enough = () => out.length >= need;
   const hint = String(hintName || '').toLowerCase();
   await walkRepos(hintName, random, async trees => {
@@ -3146,7 +3148,7 @@ async function runSearch(){
   const ctrl = S.ctrl = new AbortController();
   const want = Math.max(1, Math.min(30, Math.round(+$('sCountIn').value || 6))); $('sCountIn').value = want;
   const thr = +$('sMinR').value / 100, random = S.random;
-  S.hidden = 0; S.scanned = 0; S.exhausted = false; S.pageLabel = '';
+  S.hidden = 0; S.scanned = 0; S.exhausted = false; S.pageLabel = ''; S.partial = null;
   $('sGo').disabled = true; $('sResults').innerHTML = ''; sStatusText('');
   try{
     let list;
@@ -3169,7 +3171,15 @@ async function runSearch(){
       ? [t('sFound', nf(list.length)), list.length < want && S.exhausted ? t('sExhausted') : '', S.scanned ? t('sScanned', nf(S.scanned)) : '', hiddenNote].filter(Boolean).join(' · ')
       : [t('sNone'), hiddenNote].filter(Boolean).join(' · '));
   }catch(e){
-    if(S.ctrl === ctrl) sStatusText(e?.k?.[0] === 'cancelled' ? t('sCancelled') : tx(errText(e)), e?.k?.[0] !== 'cancelled');
+    if(S.ctrl !== ctrl) return;
+    const stopped = e?.k?.[0] === 'cancelled';
+    const found = stopped && S.partial?.length ? pick([...S.partial], want, random) : null;
+    if(found){
+      // stopped by the user: keep what was found so far (thumbnails are skipped — nothing more is downloaded)
+      seenAdd(found.map(c => c.key));
+      renderResults(found);
+      sStatusText([t('sStopped', nf(found.length)), S.scanned ? t('sScanned', nf(S.scanned)) : ''].filter(Boolean).join(' · '));
+    }else sStatusText(stopped ? t('sCancelled') : tx(errText(e)), !stopped);
   }finally{
     if(S.ctrl === ctrl){ $('sGo').disabled = false; $('sProg').hidden = true; }
   }
