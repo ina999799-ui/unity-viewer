@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-w0g+F9FrDm5Rhhj8o6/vwwzKVacMj4pqbfEvjC8zqOs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-RVgS2VaDkZyh9zmOD7N9DjmfJMHU0lEpMIMTo7pTM4s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2785,6 +2785,8 @@ $('tokSave').onclick = async () => {
     $('tokBox').open = false;
   }catch(e){}
 };
+$('tokIn').addEventListener('input', () => sStatusText(''));     // don't leave an old message next to a new paste
+$('tokIn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('tokSave').click(); } });
 $('tokDel').onclick = () => { try{ localStorage.removeItem('ghToken'); }catch(e){} renderSearchUI(); $('tokBox').open = true; };
 function sStatusText(text, bad){ $('sStatus').textContent = text || ''; $('sStatus').style.color = bad ? 'var(--bad)' : ''; }
 function sProg(text, d, n){
