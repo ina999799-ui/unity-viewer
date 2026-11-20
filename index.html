@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عارض مشاريع Unity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#191b1f; --panel:#22252b; --panel2:#2a2e35; --line:#353a43;
+  --ink:#e8eaee; --dim:#9aa1ad; --accent:#4c9bff; --accent2:#ffb84c; --bad:#ff6b6b;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans Arabic",system-ui,sans-serif;display:flex;flex-direction:column;overflow-x:clip}
+button,input{font:inherit;color:inherit}
+header{display:flex;gap:10px;align-items:center;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:17px;margin:0 0 0 8px;white-space:nowrap}
+form{display:flex;gap:8px;flex:1 1 420px}
+#url{flex:1;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:16px;direction:ltr;text-align:left}
+#url:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:700}
+.btn:focus-visible{outline:2px solid var(--accent2)}
+main{flex:1;display:grid;grid-template-columns:400px minmax(0,1fr);min-height:0}
+main>aside{order:-1}
+/* viewer */
+#viewer{position:relative;background:radial-gradient(ellipse at 50% 35%,#2d323b,#15171a 75%);min-height:300px;overflow:hidden}
+#viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#imgview{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:repeating-conic-gradient(#2a2e35 0 25%,#22252b 0 50%) 0 0/24px 24px}
+#imgview img{max-width:100%;max-height:100%;image-rendering:auto;box-shadow:0 8px 30px #0008}
+#msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--dim);pointer-events:none}
+#msg b{color:var(--ink);font-size:18px;display:block;margin-bottom:6px}
+#msg a{pointer-events:auto;color:var(--accent)}
+.tools{position:absolute;top:10px;inset-inline-start:10px;display:flex;gap:6px;flex-wrap:wrap}
+.tools .btn{min-height:38px;padding:0 12px;background:#22252bd9;backdrop-filter:blur(6px);font-size:14px}
+.tools .btn.on{border-color:var(--accent);color:var(--accent)}
+#info{position:absolute;bottom:10px;inset-inline-start:10px;inset-inline-end:10px;background:#22252bd9;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--dim);display:none}
+#info b{color:var(--ink)}
+/* list side */
+aside{display:flex;flex-direction:column;background:var(--panel);border-inline-end:1px solid var(--line);min-height:0}
+#repoTitle{padding:12px 14px 4px;font-weight:700;direction:ltr;text-align:right;overflow-wrap:anywhere}
+#note{padding:0 14px;font-size:13px;color:var(--accent2)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.chip{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;font-size:14px;white-space:nowrap}
+.chip span{color:var(--dim);margin-inline-start:4px;font-size:12px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:600}
+.chip.on span{color:#06121fb0}
+.opts{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13px;color:var(--dim);border-bottom:1px solid var(--line)}
+.opts input{width:18px;height:18px;accent-color:var(--accent)}
+#list{flex:1;overflow-y:auto;min-height:0}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px 14px;border:0;border-bottom:1px solid #2c3037;background:none;text-align:right;cursor:pointer}
+.row:hover{background:var(--panel2)}
+.row.sel{background:#4c9bff22;box-shadow:inset -3px 0 var(--accent)}
+.row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;direction:ltr;min-width:42px;text-align:center}
+.nm{direction:ltr;text-align:right;overflow:hidden}
+.nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small{display:block;color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz{color:var(--dim);font-size:12px;white-space:nowrap;direction:ltr}
+.more{margin:12px auto;display:block}
+.empty{padding:30px 16px;color:var(--dim);text-align:center}
+.c3d{background:#4c9bff26;color:#7fb8ff}.cimg{background:#5ad18a26;color:#7fe0a5}.ccode{background:#c58cff26;color:#d6adff}
+.cscene{background:#ffb84c26;color:#ffc874}.caudio{background:#ff7aa826;color:#ff9dbf}.cother{background:#ffffff14;color:#b8bec9}
+@media(max-width:820px){
+  main{grid-template-columns:1fr;grid-template-rows:48vh auto}
+  main>aside{order:0;border-inline-end:0;border-top:1px solid var(--line)}
+  #list{max-height:none;overflow:visible}
+  body{overflow-y:auto}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<header>
+  <h1>عارض مشاريع Unity</h1>
+  <form id="f">
+    <input id="url" type="text" inputmode="url" autocomplete="off" spellcheck="false"
+      placeholder="https://github.com/owner/repo" aria-label="رابط المشروع من GitHub">
+    <button class="btn primary" type="submit">اعرض</button>
+  </form>
+</header>
+
+<main>
+  <section id="viewer" aria-label="العارض">
+    <div id="imgview"><img id="img" alt=""></div>
+    <div id="msg"><b>الصق رابط مشروع من GitHub</b>بعدين اختار أي ملف 3D من القائمة حتى ينعرض هنا</div>
+    <div class="tools" id="tools" hidden>
+      <button class="btn" id="tFit" type="button">رجّع الكاميرا</button>
+      <button class="btn" id="tWire" type="button">هيكل سلكي</button>
+      <button class="btn on" id="tGrid" type="button">الأرضية</button>
+      <button class="btn" id="tSpin" type="button">لف تلقائي</button>
+    </div>
+    <div id="info"></div>
+  </section>
+
+  <aside>
+    <div id="repoTitle"></div>
+    <div id="note"></div>
+    <div class="filters" id="filters"></div>
+    <label class="opts"><input type="checkbox" id="hideMeta" checked> إخفاء ملفات ‎.meta</label>
+    <div id="list"><div class="empty">ماكو مشروع بعد</div></div>
+  </aside>
+</main>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
+import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
+import {STLLoader} from 'three/addons/loaders/STLLoader.js';
+import {PLYLoader} from 'three/addons/loaders/PLYLoader.js';
+import {ColladaLoader} from 'three/addons/loaders/ColladaLoader.js';
+import {TDSLoader} from 'three/addons/loaders/TDSLoader.js';
+import {TGALoader} from 'three/addons/loaders/TGALoader.js';
+
+{
+const $ = id => document.getElementById(id);
+
+/* ---------- file types ---------- */
+const CATS = [
+  {id:'all',   name:'الكل'},
+  {id:'3d',    name:'3D',            cls:'c3d',    ext:['fbx','obj','gltf','glb','stl','ply','dae','3ds','blend','max','ma','mb']},
+  {id:'img',   name:'صور',           cls:'cimg',   ext:['png','jpg','jpeg','tga','psd','tif','tiff','exr','hdr','bmp','gif','webp']},
+  {id:'code',  name:'سكربتات',       cls:'ccode',  ext:['cs','shader','hlsl','cginc','compute','shadergraph','shadersubgraph','js','json','asmdef']},
+  {id:'scene', name:'مشاهد وبريفاب', cls:'cscene', ext:['unity','prefab']},
+  {id:'audio', name:'صوت',           cls:'caudio', ext:['wav','mp3','ogg','aif','aiff','flac']},
+  {id:'other', name:'باقي الملفات',  cls:'cother', ext:[]}
+];
+const VIEW3D = ['fbx','obj','gltf','glb','stl','ply','dae','3ds'];
+const VIEWIMG = ['png','jpg','jpeg','gif','bmp','webp'];
+const extCat = {};
+CATS.forEach(c => (c.ext||[]).forEach(e => extCat[e] = c.id));
+const catOf = id => CATS.find(c => c.id === id);
+
+/* ---------- state ---------- */
+let repo = null, files = [], byName = new Map(), fileByPath = new Map(), filter = 'all', limit = 400, selPath = null;
+
+/* ---------- github ---------- */
+function parseRepo(s){
+  s = s.trim().replace(/\.git$/,'').replace(/\/+$/,'');
+  let m = s.match(/github\.com\/([^\/\s]+)\/([^\/\s#?]+)(?:\/tree\/([^\/?#]+))?/i);
+  if(!m) m = s.match(/^([\w.-]+)\/([\w.-]+)$/);
+  return m ? {owner:m[1], name:m[2], branch:m[3]||null} : null;
+}
+const enc = p => p.split('/').map(encodeURIComponent).join('/');
+const rawUrl   = p => `https://raw.githubusercontent.com/${repo.owner}/${repo.name}/${encodeURIComponent(repo.branch)}/${enc(p)}`;
+const mediaUrl = p => `https://media.githubusercontent.com/media/${repo.owner}/${repo.name}/${encodeURIComponent(repo.branch)}/${enc(p)}`;
+const ghUrl    = p => `https://github.com/${repo.owner}/${repo.name}/blob/${encodeURIComponent(repo.branch)}/${enc(p)}`;
+
+async function api(path){
+  const r = await fetch('https://api.github.com' + path, {headers:{Accept:'application/vnd.github+json'}});
+  if(r.status === 404) throw new Error('المشروع مو موجود أو مقفول (private).');
+  if(r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0')) throw new Error('وصلت حد GitHub للطلبات (60 بالساعة بدون تسجيل). انتظر شوية وجرب.');
+  if(!r.ok) throw new Error('صار خطأ من GitHub: ' + r.status);
+  return r.json();
+}
+
+async function loadRepo(input){
+  const p = parseRepo(input);
+  if(!p){ setMsg('الرابط مو صحيح','اكتبه هيج: https://github.com/owner/repo'); return; }
+  repo = p; files = []; byName.clear(); selPath = null; limit = 400;
+  $('repoTitle').textContent = `${p.owner}/${p.name}`;
+  $('note').textContent = '';
+  $('list').innerHTML = '<div class="empty">جاري جلب الملفات…</div>';
+  $('filters').innerHTML = '';
+  try{
+    if(!repo.branch) repo.branch = (await api(`/repos/${p.owner}/${p.name}`)).default_branch;
+    const t = await api(`/repos/${p.owner}/${p.name}/git/trees/${encodeURIComponent(repo.branch)}?recursive=1`);
+    files = t.tree.filter(x => x.type === 'blob').map(x => {
+      const name = x.path.split('/').pop();
+      const dot = name.lastIndexOf('.');
+      const ext = dot > 0 ? name.slice(dot+1).toLowerCase() : '';
+      return {path:x.path, name, dir:x.path.slice(0, -name.length-1), ext, size:x.size||0,
+              cat: ext === 'meta' ? 'meta' : (extCat[ext] || 'other')};
+    });
+    fileByPath = new Map(files.map(f => [f.path, f]));
+    files.forEach(f => { const k = f.name.toLowerCase(); if(!byName.has(k)) byName.set(k, f.path); });
+    if(t.truncated) $('note').textContent = 'المشروع كبير هواية، GitHub رجّع جزء من الملفات بس.';
+    if(!files.some(f => /(^|\/)Assets\//.test(f.path))) $('note').textContent += ' ما لكيت مجلد Assets، يمكن هذا مو مشروع Unity.';
+    try{ localStorage.setItem('lastRepo', input); }catch(e){}
+    history.replaceState(null, '', '?repo=' + encodeURIComponent(`${p.owner}/${p.name}`));
+    const n3 = files.filter(f => f.cat === '3d').length;
+    setMsg('تم جلب ' + files.length + ' ملف', n3 ? `بيه ${n3} ملف 3D. اختار واحد من القائمة.` : 'ما بيه ملفات 3D.');
+    renderFilters(); renderList();
+  }catch(e){
+    $('list').innerHTML = `<div class="empty" style="color:var(--bad)">${e.message}</div>`;
+    setMsg('ما كدرت أجيب المشروع', e.message);
+  }
+}
+
+/* ---------- list ---------- */
+const visible = () => files.filter(f => {
+  if(f.cat === 'meta') return !$('hideMeta').checked && filter === 'all';
+  return filter === 'all' || f.cat === filter;
+});
+function renderFilters(){
+  const base = files.filter(f => f.cat !== 'meta');
+  $('filters').innerHTML = CATS.map(c => {
+    const n = c.id === 'all' ? base.length : base.filter(f => f.cat === c.id).length;
+    return `<button type="button" class="chip${filter===c.id?' on':''}" data-c="${c.id}">${c.name}<span>${n}</span></button>`;
+  }).join('');
+}
+const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b/1024).toFixed(1) + ' KB' : (b/1048576).toFixed(1) + ' MB';
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderList(){
+  const v = visible();
+  if(!v.length){ $('list').innerHTML = '<div class="empty">ماكو ملفات من هالنوع</div>'; return; }
+  $('list').innerHTML = v.slice(0, limit).map(f => {
+    const c = catOf(f.cat) || {cls:'cother'};
+    return `<button type="button" class="row${f.path===selPath?' sel':''}" data-p="${esc(f.path)}">
+      <span class="tag ${c.cls}">${esc(f.ext || '—')}</span>
+      <span class="nm"><b>${esc(f.name)}</b><small>${esc(f.dir || '/')}</small></span>
+      <span class="sz">${fmt(f.size)}</span></button>`;
+  }).join('') + (v.length > limit ? `<button type="button" class="btn more" id="more">اعرض أكثر (${v.length - limit} باقي)</button>` : '');
+}
+$('filters').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  filter = b.dataset.c; limit = 400; renderFilters(); renderList(); $('list').scrollTop = 0;
+});
+$('hideMeta').addEventListener('change', () => { renderList(); });
+$('list').addEventListener('click', e => {
+  if(e.target.id === 'more'){ limit += 400; renderList(); return; }
+  const r = e.target.closest('.row'); if(!r) return;
+  selPath = r.dataset.p;
+  document.querySelectorAll('.row.sel').forEach(x => x.classList.remove('sel'));
+  r.classList.add('sel');
+  openFile(files.find(f => f.path === selPath));
+  if(matchMedia('(max-width:820px)').matches) $('viewer').scrollIntoView({behavior:'smooth'});
+});
+
+/* ---------- viewer ---------- */
+const view = $('viewer');
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+view.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 10000);
+camera.position.set(3, 2, 3);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445066, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(5, 10, 7); scene.add(sun);
+let grid = new THREE.GridHelper(10, 20, 0x4c9bff, 0x3a404a); scene.add(grid);
+let current = null, mixer = null, wire = false;
+const clock = new THREE.Clock();
+
+const resize = new ResizeObserver(() => {
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / Math.max(h,1); camera.updateProjectionMatrix();
+});
+resize.observe(view);
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  if(mixer) mixer.update(dt);
+  controls.update(); renderer.render(scene, camera);
+});
+
+function setMsg(title, text, link){
+  $('msg').style.display = 'flex';
+  $('msg').innerHTML = `<b>${esc(title)}</b>${esc(text||'')}${link ? `<br><a href="${link}" target="_blank" rel="noopener">افتحه بـGitHub</a>` : ''}`;
+}
+function clearModel(){
+  if(current){
+    scene.remove(current);
+    current.traverse(o => {
+      o.geometry?.dispose();
+      [].concat(o.material || []).forEach(m => { Object.values(m).forEach(v => v?.isTexture && v.dispose()); m.dispose(); });
+    });
+  }
+  current = null; mixer = null; $('info').style.display = 'none';
+}
+
+async function getBuffer(path){
+  let r = await fetch(rawUrl(path));
+  if(!r.ok) throw new Error('ما كدرت أنزل الملف (' + r.status + ')');
+  let buf = await r.arrayBuffer();
+  if(buf.byteLength < 400){
+    const t = new TextDecoder().decode(buf);
+    if(t.startsWith('version https://git-lfs')){
+      r = await fetch(mediaUrl(path));
+      if(!r.ok) throw new Error('الملف محفوظ بـGit LFS وما كدرت أجيبه');
+      buf = await r.arrayBuffer();
+    }
+  }
+  return buf;
+}
+
+function makeManager(){
+  const m = new THREE.LoadingManager();
+  m.setURLModifier(url => {
+    if(/^(blob|data):/.test(url)) return url;
+    let n = url.split(/[\\/]/).pop().split('?')[0];
+    try{ n = decodeURIComponent(n); }catch(e){}
+    n = n.toLowerCase();
+    const dot = n.lastIndexOf('.'), stem = dot > 0 ? n.slice(0, dot) : n, ext = dot > 0 ? n.slice(dot+1) : '';
+    // textures the browser can't decode (psd/tif/exr…) → try a same-named png/jpg/tga
+    const tries = WEBTEX.includes(ext) ? [n] : WEBTEX.map(e => stem + '.' + e);
+    const hit = tries.find(k => byName.has(k));
+    if(!hit) return ext === 'tga' ? BLANK_TGA : BLANK_PNG;   // missing texture → blank, no 404
+    const f = fileByPath.get(byName.get(hit));
+    if(hit.endsWith('.tga') && !n.endsWith('.tga')) return BLANK_PNG; // loader picked by original name, can't swap to TGA
+    return f && f.size < 300 ? mediaUrl(f.path) : rawUrl(f.path);  // tiny = Git LFS pointer
+  });
+  m.addHandler(/\.tga$/i, new TGALoader(m));
+  return m;
+}
+
+const parseP = (loader, ...a) => new Promise((res, rej) => loader.parse(...a, res, rej));
+const WEBTEX = ['png','jpg','jpeg','tga','gif','webp','bmp'];
+const BLANK_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
+const BLANK_TGA = 'data:application/octet-stream;base64,' + btoa(String.fromCharCode(0,0,2,0,0,0,0,0,0,0,0,0,1,0,1,0,32,8,255,255,255,255));
+let loadToken = 0;
+
+async function openFile(f){
+  if(!f) return;
+  const token = ++loadToken;
+  $('imgview').style.display = 'none';
+  if(VIEWIMG.includes(f.ext)){
+    clearModel(); $('tools').hidden = true;
+    setMsg('جاري التحميل…', f.name);
+    try{
+      const blob = new Blob([await getBuffer(f.path)]);
+      if(token !== loadToken) return;
+      if($('img').src.startsWith('blob:')) URL.revokeObjectURL($('img').src);
+      $('img').src = URL.createObjectURL(blob);
+      $('img').onload = () => { $('msg').style.display = 'none'; $('imgview').style.display = 'flex'; };
+      $('img').onerror = () => setMsg('الصورة ما انفتحت', f.name, ghUrl(f.path));
+    }catch(e){ setMsg('صار خطأ', e.message, ghUrl(f.path)); }
+    return;
+  }
+  if(!VIEW3D.includes(f.ext)){
+    clearModel(); $('tools').hidden = true;
+    const why = ['blend','max','ma','mb'].includes(f.ext) ? 'ملفات ' + f.ext + ' تحتاج برنامجها الأصلي، ما تنعرض بالمتصفح.' : 'هذا الملف مو 3D، تكدر تشوفه بـGitHub.';
+    setMsg(f.name, why, ghUrl(f.path));
+    return;
+  }
+  clearModel();
+  setMsg('جاري تحميل الموديل…', f.name + ' · ' + fmt(f.size));
+  const base = rawUrl(f.dir ? f.dir + '/' : '').replace(/[^/]*$/, '');
+  const mgr = makeManager();
+  const mat = () => new THREE.MeshStandardMaterial({color:0xc9ced6, roughness:.6, metalness:.1});
+  try{
+    let obj, anims = [];
+    {
+      const buf = await getBuffer(f.path);
+      if(token !== loadToken) return;
+      const text = () => new TextDecoder().decode(buf);
+      switch(f.ext){
+        case 'gltf': case 'glb': { const g = await parseP(new GLTFLoader(mgr), buf, base); obj = g.scene; anims = g.animations; break; }
+        case 'fbx': obj = new FBXLoader(mgr).parse(buf, base); anims = obj.animations || []; break;
+        case 'obj': obj = new OBJLoader(mgr).parse(text()); break;
+        case 'dae': obj = new ColladaLoader(mgr).parse(text(), base).scene; break;
+        case '3ds': obj = new TDSLoader(mgr).parse(buf, base); break;
+        case 'stl': { const g = new STLLoader().parse(buf); g.computeVertexNormals(); obj = new THREE.Mesh(g, mat()); break; }
+        case 'ply': { const g = new PLYLoader().parse(buf); g.computeVertexNormals();
+          const m = mat(); if(g.attributes.color){ m.vertexColors = true; m.color.set(0xffffff); }
+          obj = new THREE.Mesh(g, m); break; }
+      }
+    }
+    if(token !== loadToken) return;
+    current = obj; scene.add(obj);
+    let verts = 0, tris = 0, meshes = 0;
+    obj.traverse(o => {
+      if(!o.isMesh) return; meshes++;
+      const g = o.geometry, n = g.attributes.position?.count || 0;
+      verts += n; tris += (g.index ? g.index.count : n) / 3;
+      [].concat(o.material).forEach(m => {
+        if(!m) return;
+        m.wireframe = wire;
+        // drop placeholder textures with no image (e.g. missing .dds) — they render black
+        for(const k in m){ const t = m[k]; if(t && t.isTexture && !t.image && !t.isDataTexture){ m[k] = null; m.needsUpdate = true; } }
+      });
+    });
+    if(anims.length){ mixer = new THREE.AnimationMixer(obj); mixer.clipAction(anims[0]).play(); }
+    fit();
+    $('msg').style.display = 'none'; $('tools').hidden = false;
+    $('info').style.display = 'block';
+    $('info').innerHTML = `<b>${esc(f.name)}</b> · ${meshes} ميش · ${Math.round(verts).toLocaleString('en')} نقطة · ${Math.round(tris).toLocaleString('en')} مثلث`
+      + (anims.length ? ` · ${anims.length} أنيميشن (يشتغل الأول)` : '');
+  }catch(e){
+    if(token !== loadToken) return;
+    console.warn(e); clearModel(); $('tools').hidden = true;
+    setMsg('ما كدرت أعرض الموديل', e.message || String(e), ghUrl(f.path));
+  }
+}
+
+function fit(){
+  if(!current) return;
+  const box = new THREE.Box3().setFromObject(current);
+  if(box.isEmpty()) return;
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  const r = Math.max(size.x, size.y, size.z) || 1;
+  const d = r / (2 * Math.tan(camera.fov * Math.PI / 360)) * 1.6;
+  camera.near = r / 1000; camera.far = r * 1000; camera.updateProjectionMatrix();
+  camera.position.copy(center).add(new THREE.Vector3(1, .7, 1).normalize().multiplyScalar(d));
+  controls.target.copy(center); controls.update();
+  const vis = grid.visible; scene.remove(grid);
+  grid = new THREE.GridHelper(r * 4, 20, 0x4c9bff, 0x3a404a);
+  grid.position.set(center.x, box.min.y, center.z); grid.visible = vis; scene.add(grid);
+}
+
+$('tFit').onclick = fit;
+$('tWire').onclick = e => {
+  wire = !wire; e.currentTarget.classList.toggle('on', wire);
+  current?.traverse(o => o.isMesh && [].concat(o.material).forEach(m => { if(m) m.wireframe = wire; }));
+};
+$('tGrid').onclick = e => { grid.visible = !grid.visible; e.currentTarget.classList.toggle('on', grid.visible); };
+$('tSpin').onclick = e => { controls.autoRotate = !controls.autoRotate; e.currentTarget.classList.toggle('on', controls.autoRotate); };
+
+/* ---------- start ---------- */
+$('f').addEventListener('submit', e => { e.preventDefault(); loadRepo($('url').value); });
+const q = new URLSearchParams(location.search).get('repo');
+let last = null; try{ last = localStorage.getItem('lastRepo'); }catch(e){}
+if(q){ $('url').value = q; loadRepo(q); } else if(last){ $('url').value = last; }
+}
+</script>
+</body>
+</html>
