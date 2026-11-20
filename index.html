@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-6kkNQggwEPPCKPPzalgPWBlisw1H7ZH4S12gKs7eNwo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-zxz/xCLcHJHqxVSjnWxRrclAoHV/QQ0WGZ1o3eyMYcg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -234,6 +234,8 @@ html[dir=ltr] .kv dd{text-align:left}
 #sProg{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:10px}
 #sProg .xh{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:6px}
 #sProg .btn{min-height:34px;padding:0 12px;font-size:13px}
+#sProgText{flex:1;min-width:0}
+#sFoundLive{flex:none;font-weight:700;font-size:13px;color:#8fe3b0;background:#5ad18a24;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .sresults{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .sres{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);cursor:pointer;text-align:start}
 .sres:hover{border-color:#4a505b}
@@ -428,7 +430,7 @@ html[dir=ltr] .kv dd{text-align:left}
       <span class="seenbox"><span id="sSeenCount"></span><button class="btn" type="button" id="sClearSeen" data-t="sClear"></button></span>
     </div>
     <div id="sProg" hidden>
-      <div class="xh"><span id="sProgText"></span><button class="btn" type="button" id="sCancelBtn" data-t="sCancel"></button></div>
+      <div class="xh"><span id="sProgText"></span><span id="sFoundLive" hidden></span><button class="btn" type="button" id="sCancelBtn" data-t="sCancel"></button></div>
       <div class="xbar" id="sBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-labelledby="sProgText"><i></i></div>
     </div>
     <p class="dnote" id="sStatus" role="status" aria-live="polite"></p>
@@ -542,6 +544,7 @@ ar:{
   sSearching:'جاري البحث بـGitHub…', sFetching:'جاري جلب ومقارنة الملفات المرشحة… {0} / {1}', sThumbs:'جاري تجهيز الصور المصغرة… {0} / {1}',
   sRate:'وصلنا حد البحث بـGitHub. باقي {0} ثانية ونكمّل تلقائياً…', sNone:'خلصت كل نتائج GitHub وما لكيت نتائج بهالتشابه. جرّب تقلل النسبة أو امسح السجل.',
   sStopped:'وقّفت البحث · {0} نتيجة لكيتها لحد هسه',
+  sFoundLive:'لكيت: {0}',
   sNoRepeat:'عدم التكرار', sSeenCount:'طلعت قبل: {0}', sExhausted:'خلصت نتائج GitHub', sPage:'جاري البحث بـGitHub… صفحة {0} من {1}',
   sFound:'{0} نتيجة', sExact:'نفس الملف بالضبط', sTokenBad:'التوكن غير صالح أو منتهي.', sBadQuery:'GitHub ما قبل هالبحث. جرّب كلمة ثانية.',
   sCancelled:'تم إلغاء البحث.', sBadFile:'الملف اللي اخترته مو من نوعه، أو ممنوع لأسباب أمان.',
@@ -618,6 +621,7 @@ en:{
   sSearching:'Searching GitHub…', sFetching:'Fetching and comparing candidates… {0} / {1}', sThumbs:'Preparing thumbnails… {0} / {1}',
   sRate:'GitHub search limit reached. {0} seconds left, then it continues automatically…', sNone:'All GitHub results checked, none at this similarity. Lower it or clear the history.',
   sStopped:'Search stopped · {0} results found so far',
+  sFoundLive:'Found: {0}',
   sNoRepeat:'No repeats', sSeenCount:'Shown before: {0}', sExhausted:'GitHub results exhausted', sPage:'Searching GitHub… page {0} of {1}',
   sFound:'{0} results', sExact:'Exactly the same file', sTokenBad:'The token is invalid or expired.', sBadQuery:'GitHub rejected this search. Try another word.',
   sCancelled:'Search cancelled.', sBadFile:'The chosen file is not what its type says, or is blocked for safety.',
@@ -2802,11 +2806,19 @@ $('tokDel').onclick = () => { try{ localStorage.removeItem('ghToken'); }catch(e)
 function sStatusText(text, bad){ $('sStatus').textContent = text || ''; $('sStatus').style.color = bad ? 'var(--bad)' : ''; }
 function sProg(text, d, n){
   $('sProg').hidden = false; $('sProgText').textContent = text;
+  renderFound();
   const bar = $('sBar');
   bar.classList.toggle('ind', !n);
   bar.firstElementChild.style.width = n ? (d / n * 100).toFixed(1) + '%' : '';
   if(n) bar.setAttribute('aria-valuenow', Math.round(d / n * 100)); else bar.removeAttribute('aria-valuenow');
 }
+/* live count of results found so far: appears at 1 and goes up as each one is found */
+function renderFound(){
+  const found = Math.min(S.partial?.length || 0, S.want || Infinity);   // never more than the number asked for
+  $('sFoundLive').hidden = !found;
+  if(found) $('sFoundLive').innerHTML = tIso('sFoundLive', nf(found));
+}
+const addFound = (out, c) => { out.push(c); renderFound(); };
 const sleep = (ms, signal) => new Promise((res, rej) => {
   const id = setTimeout(res, ms);
   signal?.addEventListener('abort', () => { clearTimeout(id); rej(new TErr('cancelled')); }, {once:true});
@@ -2951,7 +2963,7 @@ async function repoTree(r){
    loads each page's Unity repos with their Assets tree and hands them to `visit`, until
    `enough()` says stop or GitHub has no more repositories. Random mode shuffles the page order. */
 const REPO_PER_PAGE = 20;
-async function walkRepos(term, random, visit, enough){
+async function walkRepos(term, random, visit, enough, perRepo = false){
   const stem = String(term || '').replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, ' ').trim();
   const queries = [];
   if(stem.length >= 3) queries.push(`${stem} unity language:C# archived:false`);
@@ -2978,11 +2990,15 @@ async function walkRepos(term, random, visit, enough){
       const trees = []; let n = 0;
       sProg(`${S.pageLabel} · ${t('sFetching', 0, repos.length)}`, 0, repos.length);
       await pool(repos, 3, async r => {
-        try{ const x = await repoTree(r); if(x) trees.push(x); }catch(e){ if(!(e instanceof Silent)) throw e; }
+        if(perRepo && enough()) return;
+        try{
+          const x = await repoTree(r);
+          if(x){ if(perRepo) await visit([x]); else trees.push(x); }   // perRepo: results count up as each repo arrives
+        }catch(e){ if(!(e instanceof Silent)) throw e; }
         finally{ n++; if(!S.ctrl.signal.aborted) sProg(`${S.pageLabel} · ${t('sFetching', n, repos.length)}`, n, repos.length); }
       });
       if(S.ctrl.signal.aborted) throw new TErr('cancelled');
-      await visit(random ? shuffle(trees) : trees);
+      if(!perRepo) await visit(random ? shuffle(trees) : trees);
     }
   }
 }
@@ -2999,9 +3015,9 @@ async function nameTreeSearch(term, want, thr, random){
       if(c.score < thr) continue;
       keys.add(c.key);
       if(seen.has(c.key)){ S.hidden++; continue; }
-      out.push(c);
+      addFound(out, c);
     }
-  }, enough);
+  }, enough, true);
   S.exhausted = !enough();
   return pick(out, want, random);
 }
@@ -3031,7 +3047,7 @@ async function codeTreeSearch(term, want, thr, random){
         const lineStart = Math.max(0, txt.lastIndexOf('\n', at - 1) + 1), lineEnd = txt.indexOf('\n', at + term.length);
         c.frags = [txt.slice(lineStart, lineEnd < 0 ? Math.min(txt.length, lineStart + 240) : lineEnd)];
         c.score = codeSim(term, c.frags);
-        if(c.score >= thr){ c.frag = bestFrag(term, c.frags); out.push(c); }
+        if(c.score >= thr){ c.frag = bestFrag(term, c.frags); addFound(out, c); }
       }catch(e){ if(!(e instanceof Silent)) throw e; }
       finally{ done++; if(!signal.aborted && (done % 5 === 0 || done === cands.length)) sProg(`${S.pageLabel} · ${t('sFetching', done, cands.length)}`, done, cands.length); }
     });
@@ -3061,7 +3077,7 @@ async function metaSearch(kind, hintName, measure, want, random){
         fresh.push(c);
       }
     }
-    await compareAll(fresh, async c => { const res = await measure(c); if(res) out.push(res); }, enough);
+    await compareAll(fresh, async c => { const res = await measure(c); if(res) addFound(out, res); }, enough);
   }, enough);
   S.exhausted = !enough();
   return pick(out, want, random);
@@ -3148,7 +3164,7 @@ async function runSearch(){
   const ctrl = S.ctrl = new AbortController();
   const want = Math.max(1, Math.min(30, Math.round(+$('sCountIn').value || 6))); $('sCountIn').value = want;
   const thr = +$('sMinR').value / 100, random = S.random;
-  S.hidden = 0; S.scanned = 0; S.exhausted = false; S.pageLabel = ''; S.partial = null;
+  S.hidden = 0; S.scanned = 0; S.exhausted = false; S.pageLabel = ''; S.partial = null; S.want = want;
   $('sGo').disabled = true; $('sResults').innerHTML = ''; sStatusText('');
   try{
     let list;
