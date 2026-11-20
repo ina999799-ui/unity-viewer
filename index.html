@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-WPjJl5YftJy6AH8E3yNEMiPZ2pfOKlqnhrcAEGBcRu0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-0CZ4GSFz33HuxQ5tyTWEBCImrqU/cAgistTxx66Fl2k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,6 +72,23 @@ main>aside{order:-1}
 #dims{position:absolute;top:58px;inset-inline-start:10px;background:#22252be6;border:1px solid var(--accent2);color:var(--accent2);border-radius:8px;padding:4px 10px;font-size:13px;direction:ltr;z-index:2}
 #info{position:absolute;bottom:10px;inset-inline-start:10px;inset-inline-end:10px;background:#22252bd9;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--dim);z-index:2;overflow-wrap:anywhere}
 #info b{color:var(--ink)}
+/* progress bar */
+#xfer{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:58;width:min(440px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px 12px;box-shadow:0 12px 32px #000a}
+#xfer .xh{display:flex;gap:12px;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:7px}
+#xferLabel{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#xferNum{color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.xbar{position:relative;height:8px;border-radius:4px;background:#ffffff14;overflow:hidden;direction:ltr}
+.xbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:4px;transition:width .15s linear}
+.xbar.ind i{width:35%;animation:xind 1.1s linear infinite}
+@keyframes xind{from{transform:translateX(-100%)}to{transform:translateX(290%)}}
+#xfer.done .xbar i{background:var(--good)}
+#xfer.done #xferLabel{color:var(--good);font-weight:600}
+/* connection */
+#netfail{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:61;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:var(--panel);border:1px solid var(--bad);border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #000a;max-width:calc(100vw - 24px)}
+#netfail span{font-size:14px}
+#netfail .btn{min-height:38px;padding:0 12px;font-size:14px}
+#toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:62;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;box-shadow:0 8px 24px #0008}
+@media(prefers-reduced-motion:reduce){.xbar.ind i{animation:none;width:100%;opacity:.5}}
 /* stall banner */
 #stall{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:var(--panel);border:1px solid var(--accent2);border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #000a;max-width:calc(100vw - 24px)}
 #stall span{font-size:14px}
@@ -138,8 +155,10 @@ html[dir=ltr] .row.sel{box-shadow:inset 3px 0 var(--accent)}
 .row.bad .th{outline:1px solid var(--bad)}
 .rowmain{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:7px 14px;border:0;background:none;text-align:start;cursor:pointer;min-height:56px}
 .rowmain:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.th{width:44px;height:44px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;direction:ltr;background-size:cover;background-position:center;overflow:hidden}
-.th.has{background-color:#15171a;color:transparent}
+/* thumbnail box: fixed 48×48, image centred and fully visible (contain), never overflows the row */
+.th{position:relative;flex:none;width:48px;height:48px;min-width:48px;max-width:48px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;direction:ltr;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 2px;align-self:center}
+.th.has{background:#15171a;color:transparent}
+.th img{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);object-fit:contain;object-position:center;display:block}
 .nm{direction:ltr;text-align:right;overflow:hidden}
 html[dir=ltr] .nm{text-align:left}
 .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -316,6 +335,16 @@ html[dir=ltr] .kv dd{text-align:left}
 </main>
 
 <div id="drop" hidden data-t="dropHint"></div>
+<div id="xfer" hidden>
+  <div class="xh"><span id="xferLabel"></span><span id="xferNum"></span></div>
+  <div class="xbar" id="xferBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-labelledby="xferLabel"><i></i></div>
+</div>
+<div id="netfail" role="alertdialog" aria-live="assertive" hidden>
+  <span data-t="netFail"></span>
+  <button class="btn primary" type="button" id="netRetry" data-t="retry"></button>
+  <button class="btn" type="button" id="netCancel" data-t="stallCancel"></button>
+</div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
 <div id="stall" role="alertdialog" aria-live="assertive" hidden>
   <span id="stallText"></span>
   <button class="btn primary" type="button" id="stallWait" data-t="stallWait"></button>
@@ -424,6 +453,8 @@ ar:{
   editorN:'{0} ملف بيه أشياء تستاهل تنتبه لها', kAuto:'يشتغل تلقائياً', kBuild:'وقت الـBuild', kMenu:'قائمة/زر', kRisk:'أمر حساس',
   editorNote:'هذا فحص نصي بسيط: يبيّن الأماكن، والقرار إلك.',
   glWait:'GitLab حدّد عدد الطلبات بدون تسجيل دخول، ننتظر شوية ونكمّل تلقائياً…',
+  xferOne:'جاري التحميل: {0}', xferMany:'جاري تحميل {0} ملف', xferOf:'{0} من {1} · {2}', xferDone:'اكتمل ✓',
+  netFail:'انقطع الاتصال أثناء التحميل.', retry:'إعادة المحاولة', online:'رجع الاتصال ✓', offline:'انقطع الاتصال بالإنترنت',
 },
 en:{
   title:'Unity Project Viewer', show:'Show', urlLabel:'GitHub or GitLab project link',
@@ -481,10 +512,14 @@ en:{
   editorN:'{0} files worth a look', kAuto:'Runs automatically', kBuild:'At build time', kMenu:'Menu / button', kRisk:'Sensitive call',
   editorNote:'This is a simple text scan: it points at places, the decision is yours.',
   glWait:'GitLab is limiting anonymous requests; waiting a moment and continuing automatically…',
+  xferOne:'Loading: {0}', xferMany:'Loading {0} files', xferOf:'{0} of {1} · {2}', xferDone:'Done ✓',
+  netFail:'The connection dropped during the download.', retry:'Retry', online:'Connection restored ✓', offline:'You are offline',
 }};
 let lang = store.get('lang', 'ar') === 'en' ? 'en' : 'ar';
 const t = (k, ...a) => (STR[lang][k] ?? STR.ar[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
 const tx = v => typeof v === 'function' ? v() : Array.isArray(v) ? t(...v) : (v ?? '');
+// same as t(), but as HTML with every value isolated left-to-right (sizes/percentages inside Arabic text)
+const tIso = (k, ...a) => esc(STR[lang][k] ?? STR.ar[k] ?? k).replace(/\{(\d)\}/g, (_, i) => `<bdi dir="ltr">${esc(a[i] ?? '')}</bdi>`);
 class TErr extends Error{ constructor(k, ...a){ super(t(k, ...a)); this.k = [k, ...a]; } }
 class Silent extends Error{}                     // file failed a safety check → ignore quietly
 const errText = e => e?.k ? e.k : (e?.message || String(e));
@@ -569,32 +604,156 @@ const rowOf = p => [...document.querySelectorAll('#list .row')].find(r => r.data
    downloads with a stall watchdog (30 s without progress → ask)
    ===================================================================== */
 const STALL_MS = 30000;
-const stalls = new Set();
+const stalls = new Set(), netFails = new Set();
+/* Fetch with: progress (shared bar), a stall watchdog, and resume after a dropped connection.
+   Bytes already received are kept; "retry" asks only for the rest with an HTTP Range request
+   (when the server ignores it, the download starts over). */
 async function fetchWatched(url, opts = {}){
-  const {quiet, ...init} = opts;
+  const {quiet, label, size, ...init} = opts;
+  const expect = size > 0 ? size : null;                 // real size from the file list (wire may be gzip)
   const ctrl = new AbortController();
-  const w = {ctrl, last:Date.now(), stalled:false};
+  const w = {ctrl, last:Date.now(), stalled:false, paused:false};
   const tick = () => { w.last = Date.now(); if(w.stalled){ w.stalled = false; stalls.delete(w); renderStall(); } };
   const timer = setInterval(() => {
-    if(w.stalled || Date.now() - w.last < STALL_MS) return;
+    if(w.paused || w.stalled || Date.now() - w.last < STALL_MS) return;
     if(quiet){ ctrl.abort(); return; }                 // background work (thumbnails) just gives up
     w.stalled = true; stalls.add(w); renderStall();
   }, 1000);
+  const xf = quiet ? null : xferStart(label || nameFromUrl(url), expect);
+  let chunks = [], n = 0, total = null, resumable = false, r = null, ok = false;
   try{
-    const r = await fetch(url, {...init, signal:ctrl.signal, referrerPolicy:'no-referrer'});
-    tick();
-    if(!r.ok || !r.body) return {r, buf: r.ok ? await r.arrayBuffer() : null};
-    const reader = r.body.getReader(), chunks = []; let n = 0;
-    for(;;){ const {done, value} = await reader.read(); if(done) break; chunks.push(value); n += value.length; tick(); }
+    for(;;){
+      try{
+        const headers = {...(init.headers || {})};
+        if(n > 0 && resumable) headers.Range = `bytes=${n}-`;
+        else{ chunks = []; n = 0; }
+        r = await fetch(url, {...init, headers, signal:ctrl.signal, referrerPolicy:'no-referrer'});
+        tick();
+        if(n > 0 && r.status !== 206){ chunks = []; n = 0; }          // range not honoured → start over
+        if(!r.ok) return {r, buf:null};
+        if(r.status !== 206){
+          const cl = +r.headers.get('content-length') || null;
+          total = expect ?? cl;
+          // only resume plain GETs whose wire bytes are the file bytes (Content-Length matches)
+          resumable = !init.method && cl !== null && (expect === null || cl === expect);
+        }
+        if(!r.body){ const b = new Uint8Array(await r.arrayBuffer()); chunks.push(b); n += b.length; }
+        else{
+          const reader = r.body.getReader();
+          for(;;){
+            const {done, value} = await reader.read();
+            if(done) break;
+            chunks.push(value); n += value.length; tick();
+            if(total !== null && n > total){ total = null; resumable = false; }   // compressed transfer
+            xferUpdate(xf, n, total);
+          }
+        }
+        break;
+      }catch(e){
+        if(ctrl.signal.aborted) throw new TErr('cancelled');
+        if(quiet) throw e;
+        w.paused = true; xferPause(xf, true);
+        try{ await askRetry(); }                        // network dropped: wait for "retry" (rejects on cancel)
+        finally{ w.paused = false; w.last = Date.now(); xferPause(xf, false); }
+      }
+    }
     const out = new Uint8Array(n); let o = 0;
     for(const c of chunks){ out.set(c, o); o += c.length; }
+    ok = true;
+    xferUpdate(xf, n, n);
     return {r, buf:out.buffer};
-  }catch(e){
-    if(ctrl.signal.aborted) throw new TErr('cancelled');
-    throw e;
   }finally{
     clearInterval(timer);
     if(stalls.delete(w)) renderStall();
+    xferEnd(xf, ok);
+  }
+}
+const nameFromUrl = u => { try{ const p = new URL(u); const f = p.pathname.split('/').filter(Boolean).pop() || p.host; return decodeURIComponent(f === 'raw' ? p.pathname.split('/').slice(-2, -1)[0] : f); }catch(e){ return ''; } };
+
+/* retry prompt after a dropped connection */
+function askRetry(){ return new Promise((res, rej) => { netFails.add({res, rej}); renderNet(); }); }
+function renderNet(){ $('netfail').hidden = !netFails.size; }
+$('netRetry').onclick = () => { const a = [...netFails]; netFails.clear(); renderNet(); a.forEach(x => x.res()); };
+$('netCancel').onclick = () => { const a = [...netFails]; netFails.clear(); renderNet(); a.forEach(x => x.rej(new TErr('cancelled'))); };
+
+/* connection toasts */
+let toastTimer = null;
+function toast(text, sticky){
+  clearTimeout(toastTimer);
+  $('toast').textContent = text; $('toast').hidden = false;
+  if(!sticky) toastTimer = setTimeout(() => $('toast').hidden = true, 3000);
+}
+addEventListener('offline', () => toast(t('offline'), true));
+addEventListener('online', () => toast(t('online')));
+
+/* ---- progress bar: one bar for all foreground transfers ---- */
+const xfers = new Set();
+const newSess = () => ({doneLoaded:0, doneTotal:0, unknown:false, count:0, failed:false, plan:0, planCount:0, open:false});
+let xsess = newSess(), xferHide = null, xferRaf = 0;
+/* a batch (ZIP) announces its total up front; the bar then runs 0→100% over all its files */
+function xferPlan(bytes, count){
+  clearTimeout(xferHide);
+  xsess = newSess(); xsess.plan = bytes; xsess.planCount = count; xsess.open = true;
+  $('xfer').classList.remove('done');
+}
+function xferPlanEnd(ok){ xsess.open = false; if(!ok) xsess.failed = true; if(!xfers.size) xferFinish(); }
+function xferStart(name, expect){
+  clearTimeout(xferHide);
+  if(!xfers.size && !xsess.open && $('xfer').classList.contains('done')) xsess = newSess();
+  const x = {name:plainName(name || ''), loaded:0, total:expect ?? null, paused:false};
+  xfers.add(x); xsess.count++;
+  $('xfer').classList.remove('done');
+  xferRender();
+  return x;
+}
+function xferUpdate(x, loaded, total){
+  if(!x) return;
+  x.loaded = loaded; x.total = total;
+  if(!xferRaf) xferRaf = requestAnimationFrame(() => { xferRaf = 0; xferRender(); });
+}
+function xferPause(x, on){ if(x){ x.paused = on; xferRender(); } }
+function xferEnd(x, ok){
+  if(!x) return;
+  xfers.delete(x);
+  xsess.doneLoaded += x.loaded; xsess.doneTotal += x.total ?? x.loaded;
+  if(x.total === null && !ok) xsess.unknown = true;
+  if(!ok && !xsess.open) xsess.failed = true;
+  if(xfers.size || xsess.open) return xferRender();      // a batch keeps the bar until it says it is done
+  xferFinish();
+}
+function xferFinish(){
+  if(xsess.failed){ $('xfer').hidden = true; xsess = newSess(); return; }
+  // finished: keep the bar for a second with "done"
+  $('xfer').hidden = false;
+  $('xfer').classList.add('done');
+  $('xferLabel').textContent = t('xferDone');
+  $('xferNum').innerHTML = tIso('{0}', fmt(xsess.doneLoaded));
+  setBar(100);
+  xferHide = setTimeout(() => { $('xfer').hidden = true; $('xfer').classList.remove('done'); xsess = newSess(); }, 1000);
+}
+function setBar(pct){
+  const bar = $('xferBar');
+  bar.classList.toggle('ind', pct === null);
+  bar.firstElementChild.style.width = pct === null ? '' : pct.toFixed(1) + '%';
+  if(pct === null) bar.removeAttribute('aria-valuenow'); else bar.setAttribute('aria-valuenow', Math.round(pct));
+}
+function xferRender(){
+  if(!xfers.size && !xsess.open) return;
+  const act = [...xfers];
+  const loaded = xsess.doneLoaded + act.reduce((a, x) => a + x.loaded, 0);
+  const known = !xsess.unknown && act.every(x => x.total !== null);
+  const total = xsess.plan ? Math.max(xsess.plan, loaded) : known && act.length ? xsess.doneTotal + act.reduce((a, x) => a + x.total, 0) : null;
+  $('xfer').hidden = false;
+  $('xferLabel').textContent = act.some(x => x.paused) ? t('netFail')
+    : xsess.planCount ? t('xferMany', nf(xsess.planCount))
+    : xsess.count > 1 || !act.length ? t('xferMany', nf(xsess.count)) : t('xferOne', act[0].name);
+  if(total){
+    const pct = Math.min(100, loaded / total * 100);
+    $('xferNum').innerHTML = tIso('xferOf', fmt(loaded), fmt(total), Math.floor(pct) + '%');
+    setBar(pct);
+  }else{
+    $('xferNum').innerHTML = tIso('{0}', fmt(loaded));
+    setBar(null);
   }
 }
 function renderStall(){
@@ -734,7 +893,7 @@ async function glFlush(){
   const batch = glBatch; glBatch = null;
   if(!batch?.items.length) return;
   try{
-    const {r, buf} = await glFetch('https://gitlab.com/api/graphql', {quiet:batch.quiet, method:'POST', headers:{'Content-Type':'application/json'},
+    const {r, buf} = await glFetch('https://gitlab.com/api/graphql', {quiet:batch.quiet, label:batch.items.length === 1 ? batch.items[0].path.split('/').pop() : t('xferMany', nf(batch.items.length)), method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({query:GQL_BLOBS, variables:{p:repo.path, ref:repo.branch, paths:batch.items.map(b => b.path)}})});
     if(!r.ok) throw new TErr('ghErr', r.status);
     const j = JSON.parse(td.decode(buf));
@@ -743,10 +902,23 @@ async function glFlush(){
   }catch(e){ batch.items.forEach(b => b.reject(e)); }
 }
 
+async function readLocal(file, opts){
+  const xf = opts?.quiet ? null : xferStart(opts?.label || file.name, file.size);
+  let ok = false;
+  try{
+    const reader = file.stream().getReader(), chunks = []; let n = 0;
+    for(;;){ const {done, value} = await reader.read(); if(done) break; chunks.push(value); n += value.length; xferUpdate(xf, n, file.size); }
+    const out = new Uint8Array(n); let o = 0;
+    for(const c of chunks){ out.set(c, o); o += c.length; }
+    ok = true;
+    return out.buffer;
+  }finally{ xferEnd(xf, ok); }
+}
 async function getBuffer(path, opts){
+  opts = {...(opts || {}), label:opts?.label || path.split('/').pop()};
   if(repo.kind === 'local'){
     const file = repo.map.get(path); if(!file) throw new TErr('dlFail', 404);
-    return file.arrayBuffer();
+    return readLocal(file, opts);
   }
   if(repo.kind === 'gl'){
     const {r, buf} = await glFetch(rawUrl(path), opts);
@@ -754,7 +926,8 @@ async function getBuffer(path, opts){
     if(!r.ok) throw new TErr('dlFail', r.status);
     return buf;
   }
-  let {r, buf} = await fetchWatched(rawUrl(path), opts);
+  const known = fileByPath.get(path)?.size;
+  let {r, buf} = await fetchWatched(rawUrl(path), {...opts, size: known >= 400 ? known : null});
   if(!r.ok) throw new TErr('dlFail', r.status);
   if(repo.kind === 'gh' && buf.byteLength < 400){
     const tt = td.decode(buf);
@@ -773,7 +946,7 @@ const readText = async (p, opts) => {
 
 /* ---------- GitHub / GitLab APIs ---------- */
 async function apiJson(url, headers){
-  const {r, buf} = await (url.startsWith('https://gitlab.com/') ? glFetch : fetchWatched)(url, headers ? {headers} : {});
+  const {r, buf} = await (url.startsWith('https://gitlab.com/') ? glFetch : fetchWatched)(url, {label:t('fetching'), ...(headers ? {headers} : {})});
   if(r.status === 404 || r.status === 401) throw new TErr('notFound');
   if(r.status === 429 || (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0')) throw new TErr('rateLimit');
   if(r.status === 403 && repo?.kind === 'gl') throw new TErr('notFound');
@@ -987,11 +1160,11 @@ function renderList(){
     const c = catOf(f.cat) || {cls:'cother'};
     const sus = isSuspicious(f);
     const th = thumbsOn && thumbKind(f) && !sus ? thumbs.get(f.path) : null;
-    const thStyle = th && th !== 'pending' && th !== 'none' ? ` style="background-image:url('${th}')"` : '';
+    const thImg = th && th !== 'pending' && th !== 'none' ? `<img alt="" src="${esc(th)}">` : '';
     return `<div class="row${f.path===selPath?' sel':''}${sus?' bad':''}" data-p="${esc(f.path)}">
       <input type="checkbox" class="ck" ${checked.has(f.path) ? 'checked' : ''} aria-label="${esc(t('selectFile'))} ${esc(plainName(f.name))}">
       <button type="button" class="rowmain"${sus ? ` title="${esc(t('susTitle'))}"` : ''}>
-        <span class="th ${c.cls}${thStyle ? ' has' : ''}"${thStyle}>${esc(plainName(f.ext || '—').slice(0, 8))}</span>
+        <span class="th ${c.cls}${thImg ? ' has' : ''}">${esc(plainName(f.ext || '—').slice(0, 8))}${thImg}</span>
         <span class="nm"><b>${hl(f.name)}</b><small>${hl(f.dir || '/')}</small></span>
         <span class="sz">${fmt(f.size)}</span></button></div>`;
   }).join('') + (v.length > limit ? `<button type="button" class="btn more" id="more">${esc(t('more', nf(v.length - limit)))}</button>` : '');
@@ -1076,7 +1249,7 @@ function pumpThumbs(){
       if(gen !== thumbGen) return pumpThumbs();
       thumbs.set(f.path, url || 'none');
       const th = rowOf(f.path)?.querySelector('.th');
-      if(th && url){ th.style.backgroundImage = `url('${url}')`; th.classList.add('has'); }
+      if(th && url && !th.querySelector('img')){ const im = new Image(); im.alt = ''; im.src = url; th.appendChild(im); th.classList.add('has'); }
       pumpThumbs();
     });
   }
@@ -1098,11 +1271,12 @@ function renderThumb(obj){
   const box = new THREE.Box3().setFromObject(obj);
   let url = null;
   if(!box.isEmpty()){
-    const s = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
-    const r = Math.max(s.x, s.y, s.z) || 1;
-    T.cam.near = r / 100; T.cam.far = r * 100; T.cam.updateProjectionMatrix();
-    T.cam.position.copy(c).add(new THREE.Vector3(1, .7, 1).normalize().multiplyScalar(r * 1.9));
-    T.cam.lookAt(c);
+    // frame the bounding sphere: the whole model fits and sits in the centre from any angle
+    const sp = box.getBoundingSphere(new THREE.Sphere()), rad = sp.radius || 1;
+    const dist = rad / Math.sin(T.cam.fov * Math.PI / 360) * 1.06;
+    T.cam.position.copy(sp.center).add(new THREE.Vector3(1, .7, 1).normalize().multiplyScalar(dist));
+    T.cam.near = Math.max(dist - rad * 1.5, dist / 1000); T.cam.far = dist + rad * 1.5; T.cam.updateProjectionMatrix();
+    T.cam.lookAt(sp.center);
     T.r.render(T.scene, T.cam);
     url = T.r.domElement.toDataURL('image/png');
   }
@@ -1115,7 +1289,7 @@ async function makeThumb(f){
     if(f.size > 25 * 1048576) return null;
     const buf = await checkedBuffer(f, {quiet:true});
     const bmp = await createImageBitmap(new Blob([buf]));
-    const k = Math.min(88 / bmp.width, 88 / bmp.height, 1);
+    const k = Math.min(96 / bmp.width, 96 / bmp.height, 1);
     const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(bmp.width * k)); cv.height = Math.max(1, Math.round(bmp.height * k));
     cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height); bmp.close();
     return cv.toDataURL('image/png');
@@ -1159,8 +1333,10 @@ $('zipBtn').onclick = async () => {
   const total = list.reduce((a, f) => a + (f.size || 0), 0);
   if(total > 300 * 1048576 && !confirm(t('zipBig', fmt(total)))) return;
   const btn = $('zipBtn'); btn.disabled = true;
+  let planned = false, zipOk = false;
   try{
     const {zipSync} = await import('https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js');
+    if(list.every(f => f.size >= 400)){ xferPlan(total, list.length); planned = true; }   // LFS pointers / GitLab: sizes unknown
     const out = {}; let done = 0, failed = 0;
     await pool(list, 6, async f => {
       try{ out[plainName(f.path)] = [new Uint8Array(await checkedBuffer(f)), {level: STORED.has(f.ext) ? 0 : 6}]; }
@@ -1171,9 +1347,11 @@ $('zipBtn').onclick = async () => {
       const base = repo.kind === 'gh' ? repo.name : repo.kind === 'gl' ? repo.path.split('/').pop() : (repo.label || 'files');
       saveBlob(new Blob([zipSync(out)], {type:'application/zip'}), `${base}-${Object.keys(out).length}-files.zip`);
     }
+    zipOk = Object.keys(out).length > 0;
+    if(planned){ xferPlanEnd(zipOk); planned = false; }
     if(failed) alert(t('zipSome', failed));
   }catch(e){ alert(tx(errText(e))); }
-  finally{ btn.disabled = false; btn.innerHTML = `<span aria-hidden="true">⬇</span><span data-t="zip">${esc(t('zip'))}</span>`; }
+  finally{ if(planned) xferPlanEnd(false); btn.disabled = false; btn.innerHTML = `<span aria-hidden="true">⬇</span><span data-t="zip">${esc(t('zip'))}</span>`; }
 };
 
 /* =====================================================================
