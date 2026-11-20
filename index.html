@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-2zgnxlt/3YbygkVDM5xBUborNG5wQrx0JXrDNP1Yo88=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/cDfmVEB+C4kgV+JQTMA0mbNTSnn9tLcfLRH+5CRYng=' 'sha256-OMpRVzJ/R19e9XytoRDkmPIUYudGgSiB05jZDbR0QKw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com; media-src blob:; connect-src https://api.github.com https://raw.githubusercontent.com https://media.githubusercontent.com https://*.githubusercontent.com https://gitlab.com https://cdn.jsdelivr.net blob: data:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>عارض مشاريع Unity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -228,7 +228,9 @@ html[dir=ltr] .kv dd{text-align:left}
 .srange{display:flex;align-items:center;gap:8px;min-height:42px}
 .srange input{width:170px;accent-color:var(--accent)}
 .srange output{min-width:44px;color:var(--ink);font-variant-numeric:tabular-nums;direction:ltr}
-#sRandom[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+#sRandom[aria-pressed=true],#sNoRep[aria-pressed=true]{border-color:var(--accent);color:var(--accent);background:#4c9bff1f}
+.seenbox{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim)}
+.seenbox .btn{min-height:38px;padding:0 12px;font-size:13px}
 #sProg{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:10px}
 #sProg .xh{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:6px}
 #sProg .btn{min-height:34px;padding:0 12px;font-size:13px}
@@ -422,8 +424,8 @@ html[dir=ltr] .kv dd{text-align:left}
       <label class="field"><span data-t="sMin"></span><span class="srange"><input type="range" id="sMinR" min="50" max="100" step="1" value="80"><output id="sMinV" for="sMinR">80%</output></span></label>
       <label class="field"><span data-t="sCount"></span><input type="number" id="sCountIn" class="inp" min="1" max="30" step="1" value="6" style="width:96px"></label>
       <button class="btn" type="button" id="sRandom" aria-pressed="false"><span aria-hidden="true">🎲</span><span data-t="sRandom"></span></button>
-      <span style="flex:1"></span>
-      <button class="btn" type="button" id="sClearSeen" data-t="sClear"></button>
+      <button class="btn" type="button" id="sNoRep" aria-pressed="false"><span aria-hidden="true">🔁</span><span data-t="sNoRepeat"></span></button>
+      <span class="seenbox"><span id="sSeenCount"></span><button class="btn" type="button" id="sClearSeen" data-t="sClear"></button></span>
     </div>
     <div id="sProg" hidden>
       <div class="xh"><span id="sProgText"></span><button class="btn" type="button" id="sCancelBtn" data-t="sCancel"></button></div>
@@ -538,7 +540,8 @@ ar:{
   sMin:'أقل تشابه', sCount:'عدد النتائج', sRandom:'عشوائي', sGo:'دوّر', sCancel:'إلغاء',
   sClear:'مسح السجل', sCleared:'انمسح السجل. النتائج القديمة ممكن ترجع تطلع.',
   sSearching:'جاري البحث بـGitHub…', sFetching:'جاري جلب ومقارنة الملفات المرشحة… {0} / {1}', sThumbs:'جاري تجهيز الصور المصغرة… {0} / {1}',
-  sRate:'وصلنا حد البحث بـGitHub. باقي {0} ثانية ونكمّل تلقائياً…', sNone:'ما لكيت نتائج جديدة بهالتشابه. جرّب تقلل النسبة أو امسح السجل.',
+  sRate:'وصلنا حد البحث بـGitHub. باقي {0} ثانية ونكمّل تلقائياً…', sNone:'خلصت كل نتائج GitHub وما لكيت نتائج بهالتشابه. جرّب تقلل النسبة أو امسح السجل.',
+  sNoRepeat:'عدم التكرار', sSeenCount:'طلعت قبل: {0}', sExhausted:'خلصت نتائج GitHub', sPage:'جاري البحث بـGitHub… صفحة {0} من {1}',
   sFound:'{0} نتيجة', sExact:'نفس الملف بالضبط', sTokenBad:'التوكن غير صالح أو منتهي.', sBadQuery:'GitHub ما قبل هالبحث. جرّب كلمة ثانية.',
   sCancelled:'تم إلغاء البحث.', sBadFile:'الملف اللي اخترته مو من نوعه، أو ممنوع لأسباب أمان.',
   sSeen:'{0} نتيجة طلعت قبل بهالجلسة وانخفت', sScanned:'انقارن {0} ملف',
@@ -612,7 +615,8 @@ en:{
   sMin:'Minimum similarity', sCount:'Results', sRandom:'Random', sGo:'Search', sCancel:'Cancel',
   sClear:'Clear history', sCleared:'History cleared. Earlier results can show up again.',
   sSearching:'Searching GitHub…', sFetching:'Fetching and comparing candidates… {0} / {1}', sThumbs:'Preparing thumbnails… {0} / {1}',
-  sRate:'GitHub search limit reached. {0} seconds left, then it continues automatically…', sNone:'No new results at this similarity. Lower it or clear the history.',
+  sRate:'GitHub search limit reached. {0} seconds left, then it continues automatically…', sNone:'All GitHub results checked, none at this similarity. Lower it or clear the history.',
+  sNoRepeat:'No repeats', sSeenCount:'Shown before: {0}', sExhausted:'GitHub results exhausted', sPage:'Searching GitHub… page {0} of {1}',
   sFound:'{0} results', sExact:'Exactly the same file', sTokenBad:'The token is invalid or expired.', sBadQuery:'GitHub rejected this search. Try another word.',
   sCancelled:'Search cancelled.', sBadFile:'The chosen file is not what its type says, or is blocked for safety.',
   sSeen:'{0} results already shown this session are hidden', sScanned:'{0} files compared',
@@ -2733,7 +2737,7 @@ function renderEditor(){
    ===================================================================== */
 function tokenGet(){ const v = store.get('ghToken', ''); return typeof v === 'string' ? v.trim() : ''; }
 function authHeaders(){ const k = tokenGet(); return k ? {Authorization:'Bearer ' + k} : {}; }
-const S = {mode:'name', random:false, ctrl:null, file:null, fileMode:null, rate:null, results:[], hidden:0, scanned:0, mem:null};
+const S = {mode:'name', random:false, noRepeat:false, ctrl:null, file:null, fileMode:null, rate:null, results:[], hidden:0, scanned:0, mem:null, exhausted:false, pageLabel:''};
 const SEEN_KEY = 'ghSearchSeen';
 function seenGet(){
   try{ const v = sessionStorage.getItem(SEEN_KEY); return new Set(v ? JSON.parse(v) : []); }
@@ -2742,7 +2746,9 @@ function seenGet(){
 function seenAdd(keys){
   const s = seenGet(); keys.forEach(k => s.add(k));
   try{ sessionStorage.setItem(SEEN_KEY, JSON.stringify([...s])); }catch(e){ S.mem = s; }
+  renderSeenCount();
 }
+function renderSeenCount(){ $('sSeenCount').textContent = t('sSeenCount', nf(seenGet().size)); }
 function renderSearchUI(){
   const k = tokenGet();
   $('tokState').textContent = k ? t('sTokenSaved', '…' + k.slice(-4)) : t('sTokenNone');
@@ -2755,6 +2761,8 @@ function renderSearchUI(){
   $('sFileName').textContent = S.file && S.fileMode === S.mode ? plainName(S.file.name) : t(S.mode === 'img' ? 'sPickImg' : 'sPickModel');
   $('sFile').accept = S.mode === 'img' ? '.png,.jpg,.jpeg,.tga' : '.fbx,.obj,.glb';
   $('sRandom').setAttribute('aria-pressed', String(S.random));
+  $('sNoRep').setAttribute('aria-pressed', String(S.noRepeat));
+  renderSeenCount();
 }
 $('searchBtn').onclick = () => { closeMenus(); renderSearchUI(); if(!tokenGet()) $('tokBox').open = true; $('searchDlg').showModal(); };
 $('sClose').onclick = () => $('searchDlg').close();
@@ -2768,7 +2776,8 @@ $('sFileBtn').onclick = () => $('sFile').click();
 $('sFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if(!f) return; S.file = f; S.fileMode = S.mode; renderSearchUI(); };
 $('sMinR').oninput = e => $('sMinV').textContent = e.target.value + '%';
 $('sRandom').onclick = () => { S.random = !S.random; renderSearchUI(); };
-$('sClearSeen').onclick = () => { try{ sessionStorage.removeItem(SEEN_KEY); }catch(e){} S.mem = null; sStatusText(t('sCleared')); };
+$('sNoRep').onclick = () => { S.noRepeat = !S.noRepeat; renderSearchUI(); };   // off at every page load
+$('sClearSeen').onclick = () => { try{ sessionStorage.removeItem(SEEN_KEY); }catch(e){} S.mem = null; renderSeenCount(); sStatusText(t('sCleared')); };
 $('sCancelBtn').onclick = () => S.ctrl?.abort();
 $('sForm').addEventListener('submit', e => { e.preventDefault(); runSearch(); });
 // GitHub tokens: classic ghp_ (40 chars), fine-grained github_pat_ (~93), and other gh?_ types
@@ -2811,7 +2820,7 @@ async function repoSearchApi(q, page = 1, perPage = 20){
   const signal = S.ctrl.signal;
   for(let tries = 0; ; tries++){
     if(S.rate && S.rate.rem === 0 && S.rate.reset * 1000 > Date.now()) await waitRate(S.rate.reset - Date.now() / 1000, signal);
-    sProg(t('sSearching'), 0, 0);
+    sProg(S.pageLabel || t('sSearching'), 0, 0);
     const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=${perPage}&page=${page}`;
     const {r, buf} = await fetchWatched(url, {quiet:true, signal, headers:{Accept:'application/vnd.github+json', ...authHeaders()}});
     const rem = r.headers.get('x-ratelimit-remaining'), reset = +r.headers.get('x-ratelimit-reset');
@@ -2920,9 +2929,9 @@ function bestFrag(term, frags){
   if(i > 0){ const sp = f.slice(i).search(/\s/); if(sp >= 0 && sp < 20) i += sp + 1; }   // start on a word boundary
   return (i > 0 ? '… ' : '') + f.slice(i, i + 160).replace(/\s+/g, ' ').trim();
 }
+const shuffle = a => { for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 function pick(list, want, random){
-  if(random) for(let i = list.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
-  else list.sort((a, b) => b.score - a.score);
+  if(random) shuffle(list); else list.sort((a, b) => b.score - a.score);
   return list.slice(0, want);
 }
 async function repoTree(r){
@@ -2936,111 +2945,142 @@ async function repoTree(r){
   r.tree = (j.tree || []).filter(x => x.type === 'blob' && /(^|\/)Assets\//.test(x.path));
   return r.tree.length ? r : null;
 }
-async function discoverRepos(term, random, max = 14){
+/* Walks the repository-search result pages (page=1, 2, 3 … up to GitHub's 1000 results),
+   loads each page's Unity repos with their Assets tree and hands them to `visit`, until
+   `enough()` says stop or GitHub has no more repositories. Random mode shuffles the page order. */
+const REPO_PER_PAGE = 20;
+async function walkRepos(term, random, visit, enough){
   const stem = String(term || '').replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, ' ').trim();
   const queries = [];
   if(stem.length >= 3) queries.push(`${stem} unity language:C# archived:false`);
   queries.push('unity language:C# archived:false stars:>20');
-  const map = new Map();
+  const visited = new Set();
   for(const q of queries){
-    const page = random ? 1 + Math.floor(Math.random() * 5) : 1;
-    const j = await repoSearchApi(q, page, 20);
-    for(const r of j.items || []) if(!r.fork && !r.archived && r.default_branch && !map.has(r.full_name)) map.set(r.full_name, r);
-    if(map.size >= max * 2) break;
+    if(enough()) return;                                         // don't spend a search request we don't need
+    S.pageLabel = t('sPage', 1, '…');
+    let first;
+    try{ first = await repoSearchApi(q, 1, REPO_PER_PAGE); }
+    catch(e){ if(e?.k?.[0] === 'sBadQuery') continue; throw e; }
+    const maxPage = Math.max(1, Math.ceil(Math.min(first.total_count || 0, 1000) / REPO_PER_PAGE));
+    const rest = Array.from({length:maxPage - 1}, (_, i) => i + 2);
+    const pages = random ? [...shuffle(rest), 1] : [1, ...rest];
+    for(const p of pages){
+      if(enough()) return;
+      S.pageLabel = t('sPage', p, maxPage);
+      const j = p === 1 ? first : await repoSearchApi(q, p, REPO_PER_PAGE);
+      const items = j.items || [];
+      if(!items.length && !random) break;                       // GitHub ran out early
+      const repos = items.filter(r => !r.fork && !r.archived && r.default_branch && !visited.has(r.full_name));
+      repos.forEach(r => visited.add(r.full_name));
+      if(!repos.length) continue;
+      const trees = []; let n = 0;
+      sProg(`${S.pageLabel} · ${t('sFetching', 0, repos.length)}`, 0, repos.length);
+      await pool(repos, 3, async r => {
+        try{ const x = await repoTree(r); if(x) trees.push(x); }catch(e){ if(!(e instanceof Silent)) throw e; }
+        finally{ n++; if(!S.ctrl.signal.aborted) sProg(`${S.pageLabel} · ${t('sFetching', n, repos.length)}`, n, repos.length); }
+      });
+      if(S.ctrl.signal.aborted) throw new TErr('cancelled');
+      await visit(random ? shuffle(trees) : trees);
+    }
   }
-  let repos = [...map.values()];
-  if(random) repos.sort(() => Math.random() - .5);
-  repos = repos.slice(0, max);
-  const good = []; let done = 0;
-  sProg(t('sFetching', 0, repos.length), 0, repos.length);
-  await pool(repos, 3, async r => {
-    try{ const x = await repoTree(r); if(x) good.push(x); }catch(e){ if(!(e instanceof Silent)) throw e; }
-    finally{ done++; if(!S.ctrl.signal.aborted) sProg(t('sFetching', done, repos.length), done, repos.length); }
-  });
-  if(S.ctrl.signal.aborted) throw new TErr('cancelled');
-  return good;
 }
+/* "No repeats" on: results shown before are skipped and the walk continues to later pages */
+const seenFilter = () => S.noRepeat ? seenGet() : new Set();
 async function nameTreeSearch(term, want, thr, random){
-  const repos = await discoverRepos(term, random, Math.max(12, want * 2));
-  const seen = seenGet(), keys = new Set(), out = [];
-  for(const r of repos) for(const it of r.tree){
-    const c = treeCand(r, it);
-    if(!okCand(c) || keys.has(c.key)) continue;
-    c.score = nameSim(term, c.name);
-    if(c.score < thr) continue;
-    keys.add(c.key);
-    if(seen.has(c.key)){ S.hidden++; continue; }
-    out.push(c);
-  }
-  return pick(out, want, random);
-}
-async function codeTreeSearch(term, want, thr, random){
-  const repos = await discoverRepos(term, random, Math.max(10, want + 5));
-  let cands = [];
-  for(const r of repos){
-    let cs = r.tree.filter(x => /\.cs$/i.test(x.path));
-    if(random) cs.sort(() => Math.random() - .5);
-    cands.push(...cs.slice(0, 100).map(x => treeCand(r, x)));
-  }
-  cands = cands.slice(0, 700); S.scanned = cands.length;
-  const seen = seenGet(), out = [], signal = S.ctrl.signal, lt = term.toLowerCase(); let done = 0;
-  sProg(t('sFetching', 0, cands.length), 0, cands.length);
-  await pool(cands, 8, async c => {
-    try{
-      if(seen.has(c.key)){ S.hidden++; return; }
-      const b = await candBuffer(c, signal), txt = td.decode(b), at = txt.toLowerCase().indexOf(lt);
-      if(at < 0) return;
-      const lineStart = Math.max(0, txt.lastIndexOf('\n', at - 1) + 1), lineEnd = txt.indexOf('\n', at + term.length);
-      c.frags = [txt.slice(lineStart, lineEnd < 0 ? Math.min(txt.length, lineStart + 240) : lineEnd)];
-      c.score = codeSim(term, c.frags);
-      if(c.score >= thr){ c.frag = bestFrag(term, c.frags); out.push(c); }
-    }catch(e){ if(!(e instanceof Silent)) throw e; }
-    finally{ done++; if(!signal.aborted && (done % 5 === 0 || done === cands.length)) sProg(t('sFetching', done, cands.length), done, cands.length); }
-  });
-  if(signal.aborted) throw new TErr('cancelled');
-  return pick(out, want, random);
-}
-/* image / model candidates come from Assets paths in the discovered Unity trees. */
-async function metaCandidates(kind, hintName, cap, random){
-  const exts = kind === 'img' ? ['png','jpg','jpeg','tga'] : ['fbx','obj','glb'];
-  const seen = seenGet(), keys = new Set(), out = [];
-  const repos = await discoverRepos(hintName, random, Math.max(12, Math.ceil(cap / 4)));
-  const hint = String(hintName || '').toLowerCase();
-  for(const r of repos){
-    let assets = r.tree.filter(it => exts.includes(extOf(it.path)));
-    assets.sort((a, b) => (b.path.toLowerCase().endsWith('/' + hint) ? 1 : 0) - (a.path.toLowerCase().endsWith('/' + hint) ? 1 : 0));
-    if(random) assets.sort(() => Math.random() - .5);
-    for(const it of assets){
+  const seen = seenFilter(), keys = new Set(), out = [];
+  const need = random ? want * 3 : want, enough = () => out.length >= need;
+  await walkRepos(term, random, trees => {
+    for(const r of trees) for(const it of r.tree){
       const c = treeCand(r, it);
-      if(!exts.includes(c.ext) || !okCand(c) || keys.has(c.key)) continue;
+      if(!okCand(c) || keys.has(c.key)) continue;
+      c.score = nameSim(term, c.name);
+      if(c.score < thr) continue;
       keys.add(c.key);
       if(seen.has(c.key)){ S.hidden++; continue; }
       out.push(c);
-      if(out.length >= cap) break;
     }
-    if(out.length >= cap) break;
-  }
-  return out;
+  }, enough);
+  S.exhausted = !enough();
+  return pick(out, want, random);
 }
-async function compareAll(cands, measure){
-  const signal = S.ctrl.signal, out = [];
+async function codeTreeSearch(term, want, thr, random){
+  const seen = seenFilter(), out = [], signal = S.ctrl.signal, lt = term.toLowerCase();
+  const need = random ? want * 2 : want, enough = () => out.length >= need;
+  await walkRepos(term, random, async trees => {
+    const cands = [];
+    for(const r of trees){
+      const cs = r.tree.filter(x => /\.cs$/i.test(x.path));
+      if(random) shuffle(cs);
+      for(const x of cs.slice(0, 100)){
+        const c = treeCand(r, x);
+        if(!okCand(c)) continue;
+        if(seen.has(c.key)){ S.hidden++; continue; }
+        cands.push(c);
+      }
+    }
+    let done = 0;
+    sProg(`${S.pageLabel} · ${t('sFetching', 0, cands.length)}`, 0, cands.length);
+    await pool(cands, 8, async c => {
+      if(enough()) return;                                     // stop downloading once there are enough
+      try{
+        S.scanned++;
+        const b = await candBuffer(c, signal), txt = td.decode(b), at = txt.toLowerCase().indexOf(lt);
+        if(at < 0) return;
+        const lineStart = Math.max(0, txt.lastIndexOf('\n', at - 1) + 1), lineEnd = txt.indexOf('\n', at + term.length);
+        c.frags = [txt.slice(lineStart, lineEnd < 0 ? Math.min(txt.length, lineStart + 240) : lineEnd)];
+        c.score = codeSim(term, c.frags);
+        if(c.score >= thr){ c.frag = bestFrag(term, c.frags); out.push(c); }
+      }catch(e){ if(!(e instanceof Silent)) throw e; }
+      finally{ done++; if(!signal.aborted && (done % 5 === 0 || done === cands.length)) sProg(`${S.pageLabel} · ${t('sFetching', done, cands.length)}`, done, cands.length); }
+    });
+    if(signal.aborted) throw new TErr('cancelled');
+  }, enough);
+  S.exhausted = !enough();
+  return pick(out, want, random);
+}
+/* image / model: candidates are Assets files of the repos on each page (same file name first) */
+const PER_REPO = 25;
+async function metaSearch(kind, hintName, measure, want, random){
+  const exts = kind === 'img' ? ['png','jpg','jpeg','tga'] : ['fbx','obj','glb'];
+  const seen = seenFilter(), keys = new Set(), out = [];
+  const need = random ? want * 2 : want, enough = () => out.length >= need;
+  const hint = String(hintName || '').toLowerCase();
+  await walkRepos(hintName, random, async trees => {
+    const fresh = [];
+    for(const r of trees){
+      const assets = r.tree.filter(it => exts.includes(extOf(it.path)));
+      if(random) shuffle(assets);
+      assets.sort((a, b) => (b.path.toLowerCase().endsWith('/' + hint) ? 1 : 0) - (a.path.toLowerCase().endsWith('/' + hint) ? 1 : 0));
+      for(const it of assets.slice(0, PER_REPO)){
+        const c = treeCand(r, it);
+        if(!okCand(c) || keys.has(c.key)) continue;
+        keys.add(c.key);
+        if(seen.has(c.key)){ S.hidden++; continue; }
+        fresh.push(c);
+      }
+    }
+    await compareAll(fresh, async c => { const res = await measure(c); if(res) out.push(res); }, enough);
+  }, enough);
+  S.exhausted = !enough();
+  return pick(out, want, random);
+}
+async function compareAll(cands, task, enough = () => false){
+  const signal = S.ctrl.signal;
   let done = 0;
-  S.scanned = cands.length;
-  sProg(t('sFetching', 0, cands.length), 0, cands.length);
+  const label = () => `${S.pageLabel ? S.pageLabel + ' · ' : ''}${t('sFetching', done, cands.length)}`;
+  sProg(label(), 0, cands.length);
   await pool(cands, 4, async c => {
-    try{ const res = await measure(c); if(res) out.push(res); }        // failed / unsafe candidates drop out silently
-    finally{ done++; if(!signal.aborted) sProg(t('sFetching', done, cands.length), done, cands.length); }
+    try{ if(enough()) return; S.scanned++; await task(c); }     // failed / unsafe candidates drop out silently
+    finally{ done++; if(!signal.aborted) sProg(label(), done, cands.length); }
   });
   if(signal.aborted) throw new TErr('cancelled');
-  return out;
 }
 async function imageSearch(file, want, thr, random){
   const buf = await file.arrayBuffer(), ext = extOf(file.name);
   if(!['png','jpg','jpeg','tga'].includes(ext) || HIDDEN_RE.test(file.name) || sniff(buf, ext) !== 'ok') throw new TErr('sBadFile');
   const [sha, src] = await Promise.all([sha256(buf), decodeImage(buf, ext)]);
   const mine = dHash(src);
-  const cands = await metaCandidates('img', file.name, Math.min(60, Math.max(want * 6, 24)), random);
-  const scored = await compareAll(cands, async c => {
+  return metaSearch('img', file.name, async c => {
     const b = await candBuffer(c, S.ctrl.signal);
     const exact = await sha256(b) === sha;
     const img = await decodeImage(b, c.ext);
@@ -3048,16 +3088,14 @@ async function imageSearch(file, want, thr, random){
     if(sim < thr) return null;
     Object.assign(c, {score:sim, exact, thumb:thumbOf(img), extra:`${img.width}×${img.height}`});
     return c;
-  });
-  return pick(scored, want, random);
+  }, want, random);
 }
 async function modelSearch(file, want, thr, random){
   const buf = await file.arrayBuffer(), ext = extOf(file.name);
   if(!['fbx','obj','glb'].includes(ext) || HIDDEN_RE.test(file.name) || sniff(buf, ext) !== 'ok') throw new TErr('sBadFile');
   const sha = await sha256(buf);
   const mineObj = await parseModelBuffer(buf, ext), mine = modelStats(mineObj); disposeObj(mineObj);
-  const cands = await metaCandidates('model', file.name, Math.min(40, Math.max(want * 5, 16)), random);
-  const scored = await compareAll(cands, async c => {
+  return metaSearch('model', file.name, async c => {
     const b = await candBuffer(c, S.ctrl.signal);
     const exact = await sha256(b) === sha;
     const obj = await parseModelBuffer(b, c.ext), st = modelStats(obj);
@@ -3066,8 +3104,7 @@ async function modelSearch(file, want, thr, random){
     Object.assign(c, {score:sim, exact, thumb:renderThumb(obj), extra:`${nf(st.v)} · ${nf(st.t)}△`});
     disposeObj(obj);
     return c;
-  });
-  return pick(scored, want, random);
+  }, want, random);
 }
 /* thumbnails for name/code results that are images or models (also re-checks them for safety) */
 async function addThumbs(list){
@@ -3109,7 +3146,7 @@ async function runSearch(){
   const ctrl = S.ctrl = new AbortController();
   const want = Math.max(1, Math.min(30, Math.round(+$('sCountIn').value || 6))); $('sCountIn').value = want;
   const thr = +$('sMinR').value / 100, random = S.random;
-  S.hidden = 0; S.scanned = 0;
+  S.hidden = 0; S.scanned = 0; S.exhausted = false; S.pageLabel = '';
   $('sGo').disabled = true; $('sResults').innerHTML = ''; sStatusText('');
   try{
     let list;
@@ -3126,9 +3163,11 @@ async function runSearch(){
     if(ctrl.signal.aborted) throw new TErr('cancelled');
     seenAdd(list.map(c => c.key));
     renderResults(list);
+    // "nothing found" only when every GitHub result page was checked
+    const hiddenNote = S.noRepeat && S.hidden ? t('sSeen', nf(S.hidden)) : '';
     sStatusText(list.length
-      ? [t('sFound', nf(list.length)), S.scanned ? t('sScanned', nf(S.scanned)) : '', S.hidden ? t('sSeen', nf(S.hidden)) : ''].filter(Boolean).join(' · ')
-      : t('sNone') + (S.hidden ? ' · ' + t('sSeen', nf(S.hidden)) : ''));
+      ? [t('sFound', nf(list.length)), list.length < want && S.exhausted ? t('sExhausted') : '', S.scanned ? t('sScanned', nf(S.scanned)) : '', hiddenNote].filter(Boolean).join(' · ')
+      : [t('sNone'), hiddenNote].filter(Boolean).join(' · '));
   }catch(e){
     if(S.ctrl === ctrl) sStatusText(e?.k?.[0] === 'cancelled' ? t('sCancelled') : tx(errText(e)), e?.k?.[0] !== 'cancelled');
   }finally{
